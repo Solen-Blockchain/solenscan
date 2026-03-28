@@ -20,7 +20,20 @@ export default function BlockDetailPage() {
   const { data: block, loading, error } = usePolling<IndexedBlock>(fetcher, 5000);
 
   if (loading && !block) return <Loading />;
-  if (error) return <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8"><ErrorMessage message={error} /></div>;
+  if (error) {
+    const notFound = error.includes("404") || error.includes("Upstream");
+    return (
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8">
+        <ErrorMessage
+          message={
+            notFound
+              ? `Block #${formatNumber(height)} not found. The indexer may only keep recent blocks in memory.`
+              : error
+          }
+        />
+      </div>
+    );
+  }
   if (!block) return null;
 
   const rows = [

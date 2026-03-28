@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useNetwork } from "@/context/NetworkContext";
 import { NetworkId, networks } from "@/lib/networks";
@@ -14,9 +15,13 @@ export function Header() {
         <div className="flex h-16 items-center justify-between gap-4">
           <div className="flex items-center gap-6">
             <Link href="/" className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-indigo-600 flex items-center justify-center">
-                <span className="text-white font-bold text-sm">S</span>
-              </div>
+              <Image
+                src="/logo.png"
+                alt="SolenScan"
+                width={32}
+                height={32}
+                className="h-8 w-8"
+              />
               <span className="font-bold text-xl text-gray-900">
                 SolenScan
               </span>

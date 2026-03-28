@@ -8,20 +8,29 @@ import {
   RpcResponse,
 } from "./types";
 
-async function fetchApi<T>(baseUrl: string, path: string): Promise<T> {
-  const res = await fetch(`${baseUrl}${path}`, { cache: "no-store" });
+async function fetchExplorer<T>(
+  networkId: string,
+  path: string
+): Promise<T> {
+  const res = await fetch(`/api/explorer/${path}`, {
+    cache: "no-store",
+    headers: { "x-network": networkId },
+  });
   if (!res.ok) throw new Error(`API error: ${res.status}`);
   return res.json();
 }
 
 async function rpcCall<T>(
-  rpcUrl: string,
+  networkId: string,
   method: string,
   params: Record<string, unknown> = {}
 ): Promise<T> {
-  const res = await fetch(rpcUrl, {
+  const res = await fetch("/api/rpc", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "x-network": networkId,
+    },
     body: JSON.stringify({
       jsonrpc: "2.0",
       id: 1,
@@ -37,34 +46,31 @@ async function rpcCall<T>(
 }
 
 export function createApi(network: NetworkConfig) {
-  const { explorerApiUrl, rpcUrl } = network;
+  const id = network.id;
 
   return {
-    getStatus: () => fetchApi<ChainStatus>(explorerApiUrl, "/api/status"),
+    getStatus: () =>
+      fetchExplorer<ChainStatus>(id, "api/status"),
 
     getBlocks: (limit = 20) =>
-      fetchApi<IndexedBlock[]>(explorerApiUrl, `/api/blocks?limit=${limit}`),
+      fetchExplorer<IndexedBlock[]>(id, `api/blocks?limit=${limit}`),
 
     getBlock: (height: number) =>
-      fetchApi<IndexedBlock>(explorerApiUrl, `/api/blocks/${height}`),
+      fetchExplorer<IndexedBlock>(id, `api/blocks/${height}`),
 
     getAccountTxs: (account: string, limit = 20) =>
-      fetchApi<IndexedTx[]>(
-        explorerApiUrl,
-        `/api/accounts/${account}/txs?limit=${limit}`
-      ),
+      fetchExplorer<IndexedTx[]>(id, `api/accounts/${account}/txs?limit=${limit}`),
 
     getEvents: (limit = 20) =>
-      fetchApi<IndexedEvent[]>(explorerApiUrl, `/api/events?limit=${limit}`),
+      fetchExplorer<IndexedEvent[]>(id, `api/events?limit=${limit}`),
 
     getAccount: (accountId: string) =>
-      rpcCall<AccountInfo>(rpcUrl, "solen_getAccount", {
-        account_id: accountId,
-      }),
+      rpcCall<AccountInfo>(id, "solen_getAccount", { account_id: accountId }),
 
     getBalance: (accountId: string) =>
-      rpcCall<string>(rpcUrl, "solen_getBalance", { account_id: accountId }),
+      rpcCall<string>(id, "solen_getBalance", { account_id: accountId }),
 
-    getLatestBlock: () => rpcCall<IndexedBlock>(rpcUrl, "solen_getLatestBlock"),
+    getLatestBlock: () =>
+      rpcCall<IndexedBlock>(id, "solen_getLatestBlock"),
   };
 }
