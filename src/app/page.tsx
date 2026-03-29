@@ -5,11 +5,12 @@ import Link from "next/link";
 import { usePolling } from "@/hooks/useApi";
 import { useNetwork } from "@/context/NetworkContext";
 import { createApi } from "@/lib/api";
-import { ChainStatus, RpcChainStatus, IndexedBlock, IndexedEvent } from "@/lib/types";
+import { ChainStatus, RpcChainStatus, IndexedBlock, IndexedTx } from "@/lib/types";
 import { formatNumber } from "@/lib/utils";
 import { resolveSearch } from "@/components/SearchBar";
 import { StatCard } from "@/components/StatCard";
 import { BlocksTable } from "@/components/BlocksTable";
+import { TransactionsTable } from "@/components/TransactionsTable";
 import { Loading, ErrorMessage } from "@/components/Loading";
 
 function useTps(blocks: IndexedBlock[] | null) {
@@ -53,15 +54,15 @@ export default function HomePage() {
     (api: ReturnType<typeof createApi>) => api.getBlocks(10),
     []
   );
-  const eventsFetcher = useCallback(
-    (api: ReturnType<typeof createApi>) => api.getEvents(5),
+  const txsFetcher = useCallback(
+    (api: ReturnType<typeof createApi>) => api.getRecentTxs(8),
     []
   );
 
   const { data: status, error: statusError } = usePolling<ChainStatus>(statusFetcher);
   const { data: chainStatus } = usePolling<RpcChainStatus>(chainStatusFetcher);
   const { data: blocks, loading: blocksLoading, error: blocksError } = usePolling<IndexedBlock[]>(blocksFetcher);
-  const { data: events } = usePolling<IndexedEvent[]>(eventsFetcher);
+  const { data: txs } = usePolling<IndexedTx[]>(txsFetcher);
 
   const tps = useTps(blocks);
   const error = statusError || blocksError;
@@ -165,44 +166,19 @@ export default function HomePage() {
 
         <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
           <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-            <h2 className="font-semibold text-gray-900">Latest Events</h2>
+            <h2 className="font-semibold text-gray-900">Latest Transactions</h2>
             <Link
-              href="/events"
+              href="/txs"
               className="text-xs text-indigo-600 hover:text-indigo-800 font-medium px-3 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 transition-colors"
             >
               View All
             </Link>
           </div>
           <div className="px-4 pb-2">
-            {events && events.length > 0 ? (
-              <div className="divide-y divide-gray-100">
-                {events.map((event, i) => (
-                  <div key={`${event.block_height}-${event.tx_index}-${i}`} className="flex items-center justify-between py-3 hover:bg-gray-50 px-1 transition-colors">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-50 text-purple-600 text-xs font-mono">
-                        Ev
-                      </div>
-                      <div>
-                        <p className="text-sm font-mono text-gray-700">{event.topic}</p>
-                        <Link
-                          href={`/account/${event.emitter}`}
-                          className="text-xs text-gray-400 hover:text-indigo-600 font-mono"
-                        >
-                          {event.emitter.slice(0, 10)}...
-                        </Link>
-                      </div>
-                    </div>
-                    <Link
-                      href={`/block/${event.block_height}`}
-                      className="text-xs text-indigo-600 hover:text-indigo-800"
-                    >
-                      #{formatNumber(event.block_height)}
-                    </Link>
-                  </div>
-                ))}
-              </div>
+            {txs && txs.length > 0 ? (
+              <TransactionsTable transactions={txs.slice(0, 8)} compact />
             ) : (
-              <p className="py-8 text-center text-gray-400">No events yet</p>
+              <p className="py-8 text-center text-gray-400">No transactions yet</p>
             )}
           </div>
         </div>
