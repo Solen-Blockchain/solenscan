@@ -116,7 +116,10 @@ export default function TxDetailPage() {
           );
         })()}
         <Row label="Nonce" value={formatNumber(tx.nonce)} />
-        <Row label="Gas Used" value={`${formatNumber(tx.gas_used)} (${formatGas(tx.gas_used)})`} />
+        <Row label="Gas Used">
+          <span className="font-semibold text-gray-900">{formatBalance(tx.gas_used.toString())} SOLEN</span>
+          <span className="ml-2 text-xs text-gray-400">(raw: {formatNumber(tx.gas_used)})</span>
+        </Row>
         {tx.error && (
           <Row label="Error">
             <span className="text-red-600 font-mono text-sm">{tx.error}</span>

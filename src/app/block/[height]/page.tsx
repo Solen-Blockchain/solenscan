@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useNetwork } from "@/context/NetworkContext";
 import { createApi } from "@/lib/api";
 import { IndexedBlock, BlockInfo, IndexedTx } from "@/lib/types";
-import { formatTimestamp, formatNumber, formatGas, timeAgo } from "@/lib/utils";
+import { formatTimestamp, formatNumber, formatGas, formatBalance, timeAgo } from "@/lib/utils";
 import { CopyButton } from "@/components/CopyButton";
 import { TransactionsTable } from "@/components/TransactionsTable";
 import { Loading, ErrorMessage } from "@/components/Loading";
@@ -104,7 +104,10 @@ export default function BlockDetailPage() {
             {b.tx_count} transaction{b.tx_count !== 1 ? "s" : ""}
           </span>
         </Row>
-        <Row label="Gas Used" value={`${formatNumber(b.gas_used)} (${formatGas(b.gas_used)})`} />
+        <Row label="Gas Used">
+          <span className="font-semibold text-gray-900">{formatBalance(b.gas_used.toString())} SOLEN</span>
+          <span className="ml-2 text-xs text-gray-400">(raw: {formatNumber(b.gas_used)})</span>
+        </Row>
         <Row label="Proposer">
           <Link
             href={`/account/${b.proposer}`}
