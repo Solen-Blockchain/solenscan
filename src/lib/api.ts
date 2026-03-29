@@ -70,6 +70,12 @@ export function createApi(network: NetworkConfig) {
     getBlockRpc: (height: number) =>
       rpcCall<BlockInfo>(id, "solen_getBlock", { height }),
 
+    getTx: (blockHeight: number, index: number) =>
+      fetchExplorer<IndexedTx>(id, `api/tx/${blockHeight}/${index}`),
+
+    getBlockTxs: (blockHeight: number) =>
+      fetchExplorer<IndexedTx[]>(id, `api/blocks/${blockHeight}/txs`),
+
     getAccountTxs: (account: string, limit = 20) =>
       fetchExplorer<IndexedTx[]>(id, `api/accounts/${account}/txs?limit=${limit}`),
 

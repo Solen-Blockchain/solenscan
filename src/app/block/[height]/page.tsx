@@ -5,9 +5,10 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useNetwork } from "@/context/NetworkContext";
 import { createApi } from "@/lib/api";
-import { IndexedBlock, BlockInfo } from "@/lib/types";
+import { IndexedBlock, BlockInfo, IndexedTx } from "@/lib/types";
 import { formatTimestamp, formatNumber, formatGas, timeAgo } from "@/lib/utils";
 import { CopyButton } from "@/components/CopyButton";
+import { TransactionsTable } from "@/components/TransactionsTable";
 import { Loading, ErrorMessage } from "@/components/Loading";
 
 export default function BlockDetailPage() {
@@ -17,6 +18,7 @@ export default function BlockDetailPage() {
 
   const [block, setBlock] = useState<IndexedBlock | null>(null);
   const [rpcBlock, setRpcBlock] = useState<BlockInfo | null>(null);
+  const [txs, setTxs] = useState<IndexedTx[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,14 +28,16 @@ export default function BlockDetailPage() {
     async function fetchBlock() {
       try {
         const api = createApi(network);
-        const [indexedResult, rpcResult] = await Promise.allSettled([
+        const [indexedResult, rpcResult, txsResult] = await Promise.allSettled([
           api.getBlock(height),
           api.getBlockRpc(height),
+          api.getBlockTxs(height),
         ]);
 
         if (mounted.current) {
           if (indexedResult.status === "fulfilled") setBlock(indexedResult.value);
           if (rpcResult.status === "fulfilled") setRpcBlock(rpcResult.value);
+          if (txsResult.status === "fulfilled") setTxs(txsResult.value);
           if (indexedResult.status === "rejected" && rpcResult.status === "rejected") {
             setError("Block not found. The indexer may only keep recent blocks in memory.");
           } else {
@@ -88,7 +92,7 @@ export default function BlockDetailPage() {
         </div>
       </div>
 
-      <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+      <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden mb-6">
         <Row label="Block Height" value={formatNumber(b.height)} />
         <Row label="Epoch" value={b.epoch.toString()} />
         <Row label="Timestamp">
@@ -131,6 +135,20 @@ export default function BlockDetailPage() {
           </>
         )}
       </div>
+
+      {/* Block Transactions */}
+      {txs.length > 0 && (
+        <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
+            <h2 className="font-semibold text-gray-900">
+              Transactions ({txs.length})
+            </h2>
+          </div>
+          <div className="p-6">
+            <TransactionsTable transactions={txs} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

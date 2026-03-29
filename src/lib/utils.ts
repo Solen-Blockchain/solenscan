@@ -29,13 +29,16 @@ export function formatGas(gas: number): string {
   return gas.toString();
 }
 
+const DECIMALS = 8;
+const DIVISOR = BigInt(10 ** DECIMALS);
+
 export function formatBalance(raw: string | number): string {
   const n = typeof raw === "string" ? BigInt(raw) : BigInt(raw);
-  const whole = n / BigInt(1e18);
-  const frac = n % BigInt(1e18);
+  const whole = n / DIVISOR;
+  const frac = n % DIVISOR;
   if (frac === BigInt(0)) return whole.toLocaleString();
-  const fracStr = frac.toString().padStart(18, "0").replace(/0+$/, "");
-  return `${whole.toLocaleString()}.${fracStr.slice(0, 6)}`;
+  const fracStr = frac.toString().padStart(DECIMALS, "0").replace(/0+$/, "");
+  return `${whole.toLocaleString()}.${fracStr}`;
 }
 
 export function isContractAccount(codeHash: string): boolean {

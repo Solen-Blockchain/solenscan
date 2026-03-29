@@ -32,7 +32,12 @@ export function TransactionsTable({ transactions, compact }: TransactionsTablePr
                   >
                     #{formatNumber(tx.block_height)}
                   </Link>
-                  <span className="text-gray-400 text-xs">idx {tx.index}</span>
+                  <Link
+                    href={`/tx/${tx.block_height}/${tx.index}`}
+                    className="text-gray-400 hover:text-indigo-600 text-xs"
+                  >
+                    idx {tx.index}
+                  </Link>
                 </div>
                 <Link
                   href={`/account/${tx.sender}`}
@@ -88,7 +93,14 @@ export function TransactionsTable({ transactions, compact }: TransactionsTablePr
                   {formatNumber(tx.block_height)}
                 </Link>
               </td>
-              <td className="py-3 pr-4 text-gray-600">{tx.index}</td>
+              <td className="py-3 pr-4">
+                <Link
+                  href={`/tx/${tx.block_height}/${tx.index}`}
+                  className="text-indigo-600 hover:text-indigo-800"
+                >
+                  {tx.index}
+                </Link>
+              </td>
               <td className="py-3 pr-4">
                 <Link
                   href={`/account/${tx.sender}`}
