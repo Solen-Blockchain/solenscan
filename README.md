@@ -43,18 +43,26 @@ Network endpoints are configurable via environment variables. Defaults point to 
 
 | Variable | Default | Description |
 |---|---|---|
-| `NEXT_PUBLIC_DEVNET_RPC_URL` | `http://localhost:9944` | Devnet JSON-RPC endpoint |
-| `NEXT_PUBLIC_DEVNET_API_URL` | `http://localhost:9955` | Devnet Explorer REST API |
-| `NEXT_PUBLIC_TESTNET_RPC_URL` | `http://localhost:9944` | Testnet JSON-RPC endpoint |
-| `NEXT_PUBLIC_TESTNET_API_URL` | `http://localhost:9955` | Testnet Explorer REST API |
 | `NEXT_PUBLIC_MAINNET_RPC_URL` | `http://localhost:9944` | Mainnet JSON-RPC endpoint |
 | `NEXT_PUBLIC_MAINNET_API_URL` | `http://localhost:9955` | Mainnet Explorer REST API |
+| `NEXT_PUBLIC_TESTNET_RPC_URL` | `http://localhost:19944` | Testnet JSON-RPC endpoint |
+| `NEXT_PUBLIC_TESTNET_API_URL` | `http://localhost:19955` | Testnet Explorer REST API |
+| `NEXT_PUBLIC_DEVNET_RPC_URL` | `http://localhost:29944` | Devnet JSON-RPC endpoint |
+| `NEXT_PUBLIC_DEVNET_API_URL` | `http://localhost:29955` | Devnet Explorer REST API |
+
+Default port mapping:
+
+| Network | RPC | P2P | Explorer |
+|---|---|---|---|
+| Mainnet | 9944 | 30333 | 9955 |
+| Testnet | 19944 | 40333 | 19955 |
+| Devnet | 29944 | 50333 | 29955 |
 
 Example `.env.local`:
 
 ```env
-NEXT_PUBLIC_DEVNET_RPC_URL=http://localhost:9944
-NEXT_PUBLIC_DEVNET_API_URL=http://localhost:9955
+NEXT_PUBLIC_DEVNET_RPC_URL=http://localhost:29944
+NEXT_PUBLIC_DEVNET_API_URL=http://localhost:29955
 NEXT_PUBLIC_TESTNET_RPC_URL=https://testnet-rpc.solen.io
 NEXT_PUBLIC_TESTNET_API_URL=https://testnet-api.solen.io
 NEXT_PUBLIC_MAINNET_RPC_URL=https://rpc.solen.io

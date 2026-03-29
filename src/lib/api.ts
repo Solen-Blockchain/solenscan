@@ -1,7 +1,9 @@
 import { NetworkConfig } from "./networks";
 import {
   ChainStatus,
+  RpcChainStatus,
   IndexedBlock,
+  BlockInfo,
   IndexedTx,
   IndexedEvent,
   AccountInfo,
@@ -16,7 +18,10 @@ async function fetchExplorer<T>(
     cache: "no-store",
     headers: { "x-network": networkId },
   });
-  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || `API error: ${res.status}`);
+  }
   return res.json();
 }
 
@@ -52,11 +57,17 @@ export function createApi(network: NetworkConfig) {
     getStatus: () =>
       fetchExplorer<ChainStatus>(id, "api/status"),
 
+    getChainStatus: () =>
+      rpcCall<RpcChainStatus>(id, "solen_chainStatus"),
+
     getBlocks: (limit = 20) =>
       fetchExplorer<IndexedBlock[]>(id, `api/blocks?limit=${limit}`),
 
     getBlock: (height: number) =>
       fetchExplorer<IndexedBlock>(id, `api/blocks/${height}`),
+
+    getBlockRpc: (height: number) =>
+      rpcCall<BlockInfo>(id, "solen_getBlock", { height }),
 
     getAccountTxs: (account: string, limit = 20) =>
       fetchExplorer<IndexedTx[]>(id, `api/accounts/${account}/txs?limit=${limit}`),
@@ -71,6 +82,6 @@ export function createApi(network: NetworkConfig) {
       rpcCall<string>(id, "solen_getBalance", { account_id: accountId }),
 
     getLatestBlock: () =>
-      rpcCall<IndexedBlock>(id, "solen_getLatestBlock"),
+      rpcCall<BlockInfo>(id, "solen_getLatestBlock"),
   };
 }

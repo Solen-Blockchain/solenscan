@@ -1,11 +1,12 @@
 "use client";
 
-import { useCallback, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { useNetwork } from "@/context/NetworkContext";
 import { createApi } from "@/lib/api";
 import { AccountInfo, IndexedTx } from "@/lib/types";
-import { formatBalance, formatNumber, truncateHash } from "@/lib/utils";
+import { formatBalance, formatNumber, isContractAccount, truncateHash } from "@/lib/utils";
+import { CopyButton } from "@/components/CopyButton";
 import { TransactionsTable } from "@/components/TransactionsTable";
 import { Loading, ErrorMessage } from "@/components/Loading";
 
@@ -32,12 +33,8 @@ export default function AccountPage() {
         ]);
 
         if (mounted) {
-          if (accountInfo.status === "fulfilled") {
-            setAccount(accountInfo.value);
-          }
-          if (accountTxs.status === "fulfilled") {
-            setTxs(accountTxs.value);
-          }
+          if (accountInfo.status === "fulfilled") setAccount(accountInfo.value);
+          if (accountTxs.status === "fulfilled") setTxs(accountTxs.value);
           setError(null);
         }
       } catch (e) {
@@ -49,6 +46,7 @@ export default function AccountPage() {
       }
     }
 
+    setLoading(true);
     fetchAccount();
     const id = setInterval(fetchAccount, 5000);
     return () => {
@@ -57,69 +55,89 @@ export default function AccountPage() {
     };
   }, [network, accountId]);
 
-  if (loading) return <Loading />;
+  if (loading) return <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8"><Loading /></div>;
+
+  const isContract = account ? isContractAccount(account.code_hash) : false;
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8">
+      {/* Account header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Account</h1>
-        <p className="mt-1 font-mono text-sm text-gray-500 break-all">
-          {accountId}
-        </p>
+        <div className="flex items-center gap-3 mb-2">
+          <h1 className="text-2xl font-bold text-gray-900">Account</h1>
+          {account && (
+            <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+              isContract
+                ? "bg-purple-50 text-purple-700 ring-1 ring-purple-600/20"
+                : "bg-gray-100 text-gray-700 ring-1 ring-gray-500/20"
+            }`}>
+              {isContract ? "Smart Account" : "Standard Account"}
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-1">
+          <p className="font-mono text-sm text-gray-500 break-all">
+            {accountId}
+          </p>
+          <CopyButton text={accountId} />
+        </div>
       </div>
 
-      {error && <ErrorMessage message={error} />}
+      {error && <div className="mb-4"><ErrorMessage message={error} /></div>}
 
+      {/* Overview cards */}
       {account && (
         <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-            <p className="text-sm text-gray-500">Balance</p>
-            <p className="mt-1 text-xl font-semibold text-gray-900">
-              {formatBalance(account.balance)} SOL
+            <p className="text-xs text-gray-500 uppercase tracking-wide">Balance</p>
+            <p className="mt-1.5 text-2xl font-semibold text-gray-900">
+              {formatBalance(account.balance)}
             </p>
+            <p className="text-xs text-gray-400 mt-0.5">SOL</p>
           </div>
           <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-            <p className="text-sm text-gray-500">Nonce</p>
-            <p className="mt-1 text-xl font-semibold text-gray-900">
+            <p className="text-xs text-gray-500 uppercase tracking-wide">Nonce</p>
+            <p className="mt-1.5 text-2xl font-semibold text-gray-900">
               {formatNumber(account.nonce)}
             </p>
+            <p className="text-xs text-gray-400 mt-0.5">total operations</p>
           </div>
           <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-            <p className="text-sm text-gray-500">Code Hash</p>
-            <p className="mt-1 font-mono text-sm text-gray-900 break-all">
-              {account.code_hash === "0".repeat(64) ? (
-                <span className="text-gray-400">None (EOA)</span>
-              ) : (
-                truncateHash(account.code_hash, 16)
-              )}
-            </p>
+            <p className="text-xs text-gray-500 uppercase tracking-wide">Code Hash</p>
+            {isContract ? (
+              <>
+                <p className="mt-1.5 font-mono text-sm text-gray-900 break-all">
+                  {truncateHash(account.code_hash, 12)}
+                </p>
+                <CopyButton text={account.code_hash} />
+              </>
+            ) : (
+              <p className="mt-1.5 text-sm text-gray-400">No contract deployed</p>
+            )}
           </div>
         </div>
       )}
 
-      <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-        <div className="border-b border-gray-200">
+      {/* Tabs */}
+      <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+        <div className="border-b border-gray-200 bg-gray-50/50">
           <div className="flex gap-0">
-            <button
-              onClick={() => setActiveTab("txs")}
-              className={`px-6 py-3 text-sm font-medium transition-colors ${
-                activeTab === "txs"
-                  ? "border-b-2 border-indigo-600 text-indigo-600"
-                  : "text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              Transactions ({txs.length})
-            </button>
-            <button
-              onClick={() => setActiveTab("info")}
-              className={`px-6 py-3 text-sm font-medium transition-colors ${
-                activeTab === "info"
-                  ? "border-b-2 border-indigo-600 text-indigo-600"
-                  : "text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              Info
-            </button>
+            {[
+              { id: "txs" as const, label: `Transactions (${txs.length})` },
+              { id: "info" as const, label: "Details" },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`px-6 py-3 text-sm font-medium transition-colors ${
+                  activeTab === tab.id
+                    ? "border-b-2 border-indigo-600 text-indigo-600 bg-white"
+                    : "text-gray-500 hover:text-gray-700"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
           </div>
         </div>
 
@@ -133,44 +151,41 @@ export default function AccountPage() {
               </p>
             )
           ) : (
-            <div className="space-y-4">
-              <div>
-                <span className="text-sm font-medium text-gray-500">
-                  Account ID
-                </span>
-                <p className="mt-1 font-mono text-sm break-all">{accountId}</p>
+            account && (
+              <div className="space-y-0">
+                <DetailRow label="Account ID" mono>{accountId}</DetailRow>
+                <DetailRow label="Account Type">
+                  {isContract ? "Smart Account (has deployed code)" : "Standard Account (no code)"}
+                </DetailRow>
+                <DetailRow label="Balance (raw)" mono>{account.balance}</DetailRow>
+                <DetailRow label="Balance (formatted)">{formatBalance(account.balance)} SOL</DetailRow>
+                <DetailRow label="Nonce">{formatNumber(account.nonce)}</DetailRow>
+                <DetailRow label="Code Hash" mono>{account.code_hash}</DetailRow>
               </div>
-              {account && (
-                <>
-                  <div>
-                    <span className="text-sm font-medium text-gray-500">
-                      Balance (raw)
-                    </span>
-                    <p className="mt-1 font-mono text-sm">{account.balance}</p>
-                  </div>
-                  <div>
-                    <span className="text-sm font-medium text-gray-500">
-                      Code Hash
-                    </span>
-                    <p className="mt-1 font-mono text-sm break-all">
-                      {account.code_hash}
-                    </p>
-                  </div>
-                  <div>
-                    <span className="text-sm font-medium text-gray-500">
-                      Account Type
-                    </span>
-                    <p className="mt-1 text-sm">
-                      {account.code_hash === "0".repeat(64)
-                        ? "Standard Account"
-                        : "Smart Account (Contract)"}
-                    </p>
-                  </div>
-                </>
-              )}
-            </div>
+            )
           )}
         </div>
+      </div>
+    </div>
+  );
+}
+
+function DetailRow({
+  label,
+  children,
+  mono,
+}: {
+  label: string;
+  children: React.ReactNode;
+  mono?: boolean;
+}) {
+  return (
+    <div className="flex flex-col sm:flex-row border-b border-gray-100 last:border-0">
+      <div className="px-4 py-3 text-sm font-medium text-gray-500 sm:w-44">
+        {label}
+      </div>
+      <div className={`px-4 py-3 text-sm text-gray-900 flex-1 break-all ${mono ? "font-mono" : ""}`}>
+        {children}
       </div>
     </div>
   );

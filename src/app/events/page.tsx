@@ -58,8 +58,10 @@ export default function EventsPage() {
                         {truncateHash(event.emitter)}
                       </Link>
                     </td>
-                    <td className="py-3 font-mono text-xs text-gray-600">
-                      {event.topic}
+                    <td className="py-3">
+                      <span className="inline-flex items-center rounded-md bg-purple-50 px-2 py-0.5 font-mono text-xs text-purple-700">
+                        {event.topic}
+                      </span>
                     </td>
                   </tr>
                 ))}

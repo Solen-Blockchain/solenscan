@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { IndexedBlock } from "@/lib/types";
-import { truncateHash, timeAgo, formatNumber } from "@/lib/utils";
+import { truncateHash, timeAgo, formatNumber, formatGas } from "@/lib/utils";
 
 interface BlocksTableProps {
   blocks: IndexedBlock[];
@@ -10,13 +10,49 @@ interface BlocksTableProps {
 }
 
 export function BlocksTable({ blocks, compact }: BlocksTableProps) {
+  if (compact) {
+    return (
+      <div className="divide-y divide-gray-100">
+        {blocks.map((block) => (
+          <div key={block.height} className="flex items-center justify-between py-3 hover:bg-gray-50 px-1 transition-colors">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100 text-gray-500 text-xs font-mono">
+                Bk
+              </div>
+              <div>
+                <Link
+                  href={`/block/${block.height}`}
+                  className="text-indigo-600 hover:text-indigo-800 font-medium text-sm"
+                >
+                  {formatNumber(block.height)}
+                </Link>
+                <p className="text-xs text-gray-400">{timeAgo(block.timestamp_ms)}</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-sm text-gray-600">
+                {block.tx_count} txn{block.tx_count !== 1 ? "s" : ""}
+              </p>
+              <Link
+                href={`/account/${block.proposer}`}
+                className="text-xs text-gray-400 hover:text-indigo-600 font-mono"
+              >
+                {truncateHash(block.proposer, 4)}
+              </Link>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-gray-200 text-left text-gray-500">
             <th className="pb-3 pr-4 font-medium">Block</th>
-            {!compact && <th className="pb-3 pr-4 font-medium">Epoch</th>}
+            <th className="pb-3 pr-4 font-medium">Epoch</th>
             <th className="pb-3 pr-4 font-medium">Age</th>
             <th className="pb-3 pr-4 font-medium">Txns</th>
             <th className="pb-3 pr-4 font-medium">Gas Used</th>
@@ -37,15 +73,17 @@ export function BlocksTable({ blocks, compact }: BlocksTableProps) {
                   {formatNumber(block.height)}
                 </Link>
               </td>
-              {!compact && (
-                <td className="py-3 pr-4 text-gray-600">{block.epoch}</td>
-              )}
+              <td className="py-3 pr-4 text-gray-600">{block.epoch}</td>
               <td className="py-3 pr-4 text-gray-600">
                 {timeAgo(block.timestamp_ms)}
               </td>
-              <td className="py-3 pr-4 text-gray-600">{block.tx_count}</td>
+              <td className="py-3 pr-4">
+                <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
+                  {block.tx_count}
+                </span>
+              </td>
               <td className="py-3 pr-4 text-gray-600">
-                {formatNumber(block.gas_used)}
+                {formatGas(block.gas_used)}
               </td>
               <td className="py-3">
                 <Link

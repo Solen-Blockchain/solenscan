@@ -5,11 +5,30 @@ export interface ChainStatus {
   total_events: number;
 }
 
+export interface RpcChainStatus {
+  height: number;
+  latest_state_root: string;
+  pending_ops: number;
+}
+
 export interface IndexedBlock {
   height: number;
   epoch: number;
   parent_hash: string;
   state_root: string;
+  proposer: string;
+  timestamp_ms: number;
+  tx_count: number;
+  gas_used: number;
+}
+
+export interface BlockInfo {
+  height: number;
+  epoch: number;
+  parent_hash: string;
+  state_root: string;
+  transactions_root: string;
+  receipts_root: string;
   proposer: string;
   timestamp_ms: number;
   tx_count: number;
@@ -35,6 +54,7 @@ export interface IndexedEvent {
 }
 
 export interface AccountInfo {
+  id: string;
   balance: string;
   nonce: number;
   code_hash: string;

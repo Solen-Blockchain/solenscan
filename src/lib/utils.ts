@@ -9,6 +9,7 @@ export function formatTimestamp(ms: number): string {
 
 export function timeAgo(ms: number): string {
   const seconds = Math.floor((Date.now() - ms) / 1000);
+  if (seconds < 0) return "just now";
   if (seconds < 60) return `${seconds}s ago`;
   const minutes = Math.floor(seconds / 60);
   if (minutes < 60) return `${minutes}m ago`;
@@ -22,13 +23,23 @@ export function formatNumber(n: number): string {
   return n.toLocaleString();
 }
 
+export function formatGas(gas: number): string {
+  if (gas >= 1_000_000) return `${(gas / 1_000_000).toFixed(2)}M`;
+  if (gas >= 1_000) return `${(gas / 1_000).toFixed(1)}K`;
+  return gas.toString();
+}
+
 export function formatBalance(raw: string | number): string {
   const n = typeof raw === "string" ? BigInt(raw) : BigInt(raw);
   const whole = n / BigInt(1e18);
   const frac = n % BigInt(1e18);
-  if (frac === BigInt(0)) return whole.toString();
+  if (frac === BigInt(0)) return whole.toLocaleString();
   const fracStr = frac.toString().padStart(18, "0").replace(/0+$/, "");
-  return `${whole}.${fracStr.slice(0, 6)}`;
+  return `${whole.toLocaleString()}.${fracStr.slice(0, 6)}`;
+}
+
+export function isContractAccount(codeHash: string): boolean {
+  return codeHash !== "0".repeat(64) && codeHash !== "";
 }
 
 export function classNames(...classes: (string | false | undefined)[]): string {
