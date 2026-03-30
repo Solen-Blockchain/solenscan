@@ -1,8 +1,53 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useNetwork } from "@/context/NetworkContext";
+import { createApi } from "@/lib/api";
 import { IndexedTx } from "@/lib/types";
 import { truncateHash, formatNumber, formatGas, formatBalance, getTransferInfo, parseRewardEvent, parseStakeEvent } from "@/lib/utils";
+
+// Cache token names by contract address.
+const tokenNameCache: Record<string, string> = {};
+
+function useTokenNames(contractIds: string[]) {
+  const { network } = useNetwork();
+  const [names, setNames] = useState<Record<string, string>>(tokenNameCache);
+
+  useEffect(() => {
+    const unknown = contractIds.filter((id) => id && !tokenNameCache[id]);
+    if (unknown.length === 0) return;
+
+    const api = createApi(network);
+    Promise.all(
+      unknown.map(async (id) => {
+        try {
+          const [symRes, nameRes] = await Promise.all([
+            api.callView(id, "symbol"),
+            api.callView(id, "name"),
+          ]);
+          const sym = symRes.success ? new TextDecoder().decode(hexToBytes(symRes.return_data)) : "";
+          const nm = nameRes.success ? new TextDecoder().decode(hexToBytes(nameRes.return_data)) : "";
+          const label = sym || nm || truncateHash(id, 4);
+          tokenNameCache[id] = label;
+        } catch {
+          tokenNameCache[id] = truncateHash(id, 4);
+        }
+      })
+    ).then(() => setNames({ ...tokenNameCache }));
+  }, [contractIds.join(","), network]);
+
+  return names;
+}
+
+function hexToBytes(hex: string): Uint8Array {
+  const clean = hex.startsWith("0x") ? hex.slice(2) : hex;
+  const bytes = new Uint8Array(clean.length / 2);
+  for (let i = 0; i < clean.length; i += 2) {
+    bytes[i / 2] = parseInt(clean.substring(i, i + 2), 16);
+  }
+  return bytes;
+}
 
 interface TransactionsTableProps {
   transactions: IndexedTx[];
@@ -12,6 +57,14 @@ interface TransactionsTableProps {
 }
 
 export function TransactionsTable({ transactions, compact, accountFilter }: TransactionsTableProps) {
+  // Collect all token contract IDs for name lookup.
+  const tokenContracts = transactions
+    .flatMap((tx) => {
+      const t = getTransferInfo(tx.events, tx.sender);
+      return t?.tokenContract ? [t.tokenContract] : [];
+    })
+    .filter((v, i, a) => a.indexOf(v) === i);
+  const tokenNames = useTokenNames(tokenContracts);
   if (compact) {
     return (
       <div className="divide-y divide-gray-100">
@@ -101,7 +154,7 @@ export function TransactionsTable({ transactions, compact, accountFilter }: Tran
                 {transfer && (
                   <p className={`text-sm font-medium ${transfer.tokenContract ? "text-purple-700" : "text-gray-900"}`}>
                     {transfer.tokenContract
-                      ? `${formatNumber(Number(transfer.amount))} tokens`
+                      ? `${formatNumber(Number(transfer.amount))} ${tokenNames[transfer.tokenContract] || "tokens"}`
                       : `${formatBalance(transfer.amount)} SOLEN`}
                   </p>
                 )}

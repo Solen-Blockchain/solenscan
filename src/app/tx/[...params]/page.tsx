@@ -115,7 +115,7 @@ export default function TxDetailPage() {
           <CopyButton text={tx.sender} />
         </Row>
         {(() => {
-          const transfer = getTransferInfo(tx.events);
+          const transfer = getTransferInfo(tx.events, tx.sender);
           if (!transfer) return null;
           return (
             <>
@@ -128,11 +128,27 @@ export default function TxDetailPage() {
                 </Link>
                 <CopyButton text={transfer.to} />
               </Row>
-              <Row label="Value">
-                <span className="text-lg font-semibold text-gray-900">
-                  {formatBalance(transfer.amount)} SOLEN
-                </span>
-                <span className="ml-2 text-xs text-gray-400">(raw: {transfer.amount})</span>
+              <Row label={transfer.tokenContract ? "Token Transfer" : "Value"}>
+                {transfer.tokenContract ? (
+                  <>
+                    <span className="text-lg font-semibold text-purple-700">
+                      {formatNumber(Number(transfer.amount))}
+                    </span>
+                    <span className="ml-2 text-sm text-gray-500">
+                      via contract{" "}
+                      <Link href={`/account/${transfer.tokenContract}`} className="text-indigo-600 hover:text-indigo-800 font-mono">
+                        {truncateHash(transfer.tokenContract, 8)}
+                      </Link>
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-lg font-semibold text-gray-900">
+                      {formatBalance(transfer.amount)} SOLEN
+                    </span>
+                    <span className="ml-2 text-xs text-gray-400">(raw: {transfer.amount})</span>
+                  </>
+                )}
               </Row>
             </>
           );
@@ -159,7 +175,9 @@ export default function TxDetailPage() {
           </div>
           <div className="divide-y divide-gray-100">
             {tx.events.map((event, i) => {
-              const transfer = event.topic === "transfer" ? parseTransferEvent(event.data) : null;
+              const transferRaw = event.topic === "transfer" ? parseTransferEvent(event.data) : null;
+              const isTokenTransfer = transferRaw && event.emitter !== tx.sender;
+              const transfer = transferRaw ? { ...transferRaw, tokenContract: isTokenTransfer ? event.emitter : undefined } : null;
               const reward = (event.topic === "epoch_reward" || event.topic === "delegator_reward") ? parseRewardEvent(event.data) : null;
               const isDelegatorReward = event.topic === "delegator_reward";
               const stake = (event.topic === "delegate" || event.topic === "undelegate") ? parseStakeEvent(event.data) : null;
@@ -202,8 +220,17 @@ export default function TxDetailPage() {
                         </div>
                         <div className="flex items-center gap-1">
                           <span className="text-xs text-gray-500 w-16">Amount:</span>
-                          <span className="text-sm font-medium text-gray-900">{formatBalance(transfer.amount)} SOLEN</span>
-                          <span className="text-xs text-gray-400 ml-1">(raw: {transfer.amount})</span>
+                          {transfer.tokenContract ? (
+                            <>
+                              <span className="text-sm font-medium text-purple-700">{formatNumber(Number(transfer.amount))} tokens</span>
+                              <span className="text-xs text-gray-400 ml-1">(contract: {truncateHash(transfer.tokenContract, 6)})</span>
+                            </>
+                          ) : (
+                            <>
+                              <span className="text-sm font-medium text-gray-900">{formatBalance(transfer.amount)} SOLEN</span>
+                              <span className="text-xs text-gray-400 ml-1">(raw: {transfer.amount})</span>
+                            </>
+                          )}
                         </div>
                       </div>
                     )}
