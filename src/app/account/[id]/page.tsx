@@ -21,6 +21,7 @@ export default function AccountPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"txs" | "contract" | "info">("txs");
+  const [tokenBalances, setTokenBalances] = useState<{ contract: string; name: string; symbol: string; balance: string }[]>([]);
 
   useEffect(() => {
     let mounted = true;
@@ -37,6 +38,35 @@ export default function AccountPage() {
           if (accountInfo.status === "fulfilled") setAccount(accountInfo.value);
           if (accountTxs.status === "fulfilled") setTxs(accountTxs.value);
           setError(null);
+
+          // Fetch token balances for this account.
+          api.getAccountTokens(accountId).then(async (contracts) => {
+            if (!mounted || contracts.length === 0) return;
+            const balances = await Promise.all(
+              contracts.map(async (contractId) => {
+                try {
+                  const [balRes, nameRes, symRes] = await Promise.all([
+                    api.callView(contractId, "balance_of", accountId),
+                    api.callView(contractId, "name"),
+                    api.callView(contractId, "symbol"),
+                  ]);
+                  if (!balRes.success) return null;
+                  const balBytes = hexToBytes(balRes.return_data);
+                  const bal = bytesToU128(balBytes);
+                  if (bal === BigInt(0)) return null;
+                  return {
+                    contract: contractId,
+                    name: nameRes.success ? new TextDecoder().decode(hexToBytes(nameRes.return_data)) : contractId.slice(0, 12) + "...",
+                    symbol: symRes.success ? new TextDecoder().decode(hexToBytes(symRes.return_data)) : "???",
+                    balance: bal.toString(),
+                  };
+                } catch { return null; }
+              })
+            );
+            if (mounted) {
+              setTokenBalances(balances.filter((b): b is NonNullable<typeof b> => b !== null));
+            }
+          }).catch(() => {});
         }
       } catch (e) {
         if (mounted) {
@@ -115,6 +145,30 @@ export default function AccountPage() {
             ) : (
               <p className="mt-1.5 text-sm text-gray-400">No contract deployed</p>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Token balances */}
+      {tokenBalances.length > 0 && (
+        <div className="mb-6 rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+          <h3 className="text-sm font-semibold text-gray-900 mb-3">Token Balances</h3>
+          <div className="space-y-2">
+            {tokenBalances.map((token) => (
+              <div key={token.contract} className="flex items-center justify-between py-2 px-3 rounded-lg bg-gray-50">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs bg-purple-100 text-purple-700 rounded-full px-2 py-0.5 font-medium">
+                    {token.symbol}
+                  </span>
+                  <Link href={`/account/${token.contract}`} className="text-sm text-indigo-600 hover:text-indigo-800">
+                    {token.name}
+                  </Link>
+                </div>
+                <span className="font-mono text-sm font-medium text-gray-900">
+                  {formatNumber(Number(token.balance))}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
       )}

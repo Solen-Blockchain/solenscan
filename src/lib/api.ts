@@ -101,5 +101,11 @@ export function createApi(network: NetworkConfig) {
       rpcCall<{ success: boolean; return_data: string; gas_used: number; error?: string }>(
         id, "solen_callView", { contract_id: contractId, method, args: argsHex || null }
       ),
+
+    getAccountTokens: (account: string) =>
+      fetchExplorer<string[]>(id, `api/accounts/${account}/tokens`),
+
+    getContracts: () =>
+      fetchExplorer<string[]>(id, "api/contracts"),
   };
 }
