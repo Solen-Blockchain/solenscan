@@ -8,37 +8,7 @@ import { IndexedTx } from "@/lib/types";
 import { truncateHash, formatNumber, formatGas, formatBalance, getTransferInfo, parseRewardEvent, parseStakeEvent } from "@/lib/utils";
 
 // Cache token names by contract address.
-const tokenNameCache: Record<string, string> = {};
-
-function useTokenNames(contractIds: string[]) {
-  const { network } = useNetwork();
-  const [names, setNames] = useState<Record<string, string>>(tokenNameCache);
-
-  useEffect(() => {
-    const unknown = contractIds.filter((id) => id && !tokenNameCache[id]);
-    if (unknown.length === 0) return;
-
-    const api = createApi(network);
-    Promise.all(
-      unknown.map(async (id) => {
-        try {
-          const [symRes, nameRes] = await Promise.all([
-            api.callView(id, "symbol"),
-            api.callView(id, "name"),
-          ]);
-          const sym = symRes.success ? new TextDecoder().decode(hexToBytes(symRes.return_data)) : "";
-          const nm = nameRes.success ? new TextDecoder().decode(hexToBytes(nameRes.return_data)) : "";
-          const label = sym || nm || truncateHash(id, 4);
-          tokenNameCache[id] = label;
-        } catch {
-          tokenNameCache[id] = truncateHash(id, 4);
-        }
-      })
-    ).then(() => setNames({ ...tokenNameCache }));
-  }, [contractIds.join(","), network]);
-
-  return names;
-}
+const tokenNameCache: Record<string, string | null> = {};
 
 function hexToBytes(hex: string): Uint8Array {
   const clean = hex.startsWith("0x") ? hex.slice(2) : hex;
@@ -47,6 +17,38 @@ function hexToBytes(hex: string): Uint8Array {
     bytes[i / 2] = parseInt(clean.substring(i, i + 2), 16);
   }
   return bytes;
+}
+
+function useTokenNames(contractIds: string[]) {
+  const { network } = useNetwork();
+  const [, forceUpdate] = useState(0);
+
+  useEffect(() => {
+    const unknown = contractIds.filter((id) => id && tokenNameCache[id] === undefined);
+    if (unknown.length === 0) return;
+
+    // Mark as loading to prevent duplicate fetches.
+    unknown.forEach((id) => { tokenNameCache[id] = null; });
+
+    const api = createApi(network);
+    let mounted = true;
+    Promise.all(
+      unknown.map(async (id) => {
+        try {
+          const res = await api.callView(id, "symbol");
+          const sym = res.success ? new TextDecoder().decode(hexToBytes(res.return_data)) : "";
+          tokenNameCache[id] = sym || truncateHash(id, 4);
+        } catch {
+          tokenNameCache[id] = truncateHash(id, 4);
+        }
+      })
+    ).then(() => {
+      if (mounted) forceUpdate((n) => n + 1);
+    });
+    return () => { mounted = false; };
+  }, [contractIds.join(","), network]);
+
+  return tokenNameCache;
 }
 
 interface TransactionsTableProps {
