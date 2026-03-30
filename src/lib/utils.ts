@@ -44,6 +44,8 @@ export function formatBalance(raw: string | number): string {
 export interface TransferInfo {
   to: string;
   amount: string;
+  /** If set, this is a token transfer from this contract, not a native SOLEN transfer. */
+  tokenContract?: string;
 }
 
 export function parseTransferEvent(data: string): TransferInfo | null {
@@ -64,10 +66,22 @@ export function parseTransferEvent(data: string): TransferInfo | null {
   return { to, amount: amount.toString() };
 }
 
-export function getTransferInfo(events: { topic: string; data: string }[]): TransferInfo | null {
-  const transferEvent = events.find((e) => e.topic === "transfer");
-  if (!transferEvent) return null;
-  return parseTransferEvent(transferEvent.data);
+export function getTransferInfo(events: { topic: string; data: string; emitter?: string }[], sender?: string): TransferInfo | null {
+  // Prefer native SOLEN transfers (emitter == sender) over token transfers.
+  const nativeTransfer = events.find((e) => e.topic === "transfer" && e.emitter === sender);
+  if (nativeTransfer) {
+    return parseTransferEvent(nativeTransfer.data);
+  }
+  // Fall back to token transfer (emitter is a contract, not the sender).
+  const tokenTransfer = events.find((e) => e.topic === "transfer" && e.emitter !== sender);
+  if (tokenTransfer) {
+    const info = parseTransferEvent(tokenTransfer.data);
+    if (info) {
+      info.tokenContract = tokenTransfer.emitter;
+    }
+    return info;
+  }
+  return null;
 }
 
 export interface RewardInfo {

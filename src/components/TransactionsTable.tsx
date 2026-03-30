@@ -16,7 +16,7 @@ export function TransactionsTable({ transactions, compact, accountFilter }: Tran
     return (
       <div className="divide-y divide-gray-100">
         {transactions.map((tx) => {
-          const transfer = getTransferInfo(tx.events);
+          const transfer = getTransferInfo(tx.events, tx.sender);
 
           // Sum reward events. If accountFilter is set, only sum events for that account.
           const rewardEvents = tx.events.filter((e) => e.topic === "epoch_reward" || e.topic === "delegator_reward");
@@ -47,9 +47,11 @@ export function TransactionsTable({ transactions, compact, accountFilter }: Tran
                 <div className={`flex h-10 w-10 items-center justify-center rounded-lg text-xs font-mono ${
                   isReward
                     ? "bg-amber-50 text-amber-600"
-                    : tx.success ? "bg-green-50 text-green-600" : "bg-red-50 text-red-600"
+                    : transfer?.tokenContract
+                      ? "bg-purple-50 text-purple-600"
+                      : tx.success ? "bg-green-50 text-green-600" : "bg-red-50 text-red-600"
                 }`}>
-                  {isReward ? "⛏" : "Tx"}
+                  {isReward ? "⛏" : transfer?.tokenContract ? "TK" : "Tx"}
                 </div>
                 <div>
                   <div className="flex items-center gap-1.5">
@@ -97,8 +99,10 @@ export function TransactionsTable({ transactions, compact, accountFilter }: Tran
               </div>
               <div className="text-right">
                 {transfer && (
-                  <p className="text-sm font-medium text-gray-900">
-                    {formatBalance(transfer.amount)} SOLEN
+                  <p className={`text-sm font-medium ${transfer.tokenContract ? "text-purple-700" : "text-gray-900"}`}>
+                    {transfer.tokenContract
+                      ? `${formatNumber(Number(transfer.amount))} tokens`
+                      : `${formatBalance(transfer.amount)} SOLEN`}
                   </p>
                 )}
                 {reward && (
@@ -150,7 +154,7 @@ export function TransactionsTable({ transactions, compact, accountFilter }: Tran
         </thead>
         <tbody>
           {transactions.map((tx) => {
-            const transfer = getTransferInfo(tx.events);
+            const transfer = getTransferInfo(tx.events, tx.sender);
 
             const rewardEvents = tx.events.filter((e) => e.topic === "epoch_reward" || e.topic === "delegator_reward");
             const filteredRewardEvents = accountFilter
