@@ -60,13 +60,7 @@ export function TransactionsTable({ transactions, compact }: TransactionsTablePr
                   <div className="flex items-center gap-1 text-xs text-gray-400">
                     {isReward ? (
                       <>
-                        <span>To</span>
-                        <Link
-                          href={`/account/${reward.validator}`}
-                          className="hover:text-indigo-600 font-mono"
-                        >
-                          {truncateHash(reward.validator, 4)}
-                        </Link>
+                        <span className="text-amber-600">Epoch Rewards · {rewardCount} payouts</span>
                       </>
                     ) : (
                       <>
