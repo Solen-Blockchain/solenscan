@@ -173,25 +173,64 @@ export default function AccountPage() {
   );
 }
 
+interface AbiMethod {
+  name: string;
+  args: string;
+  mutates: boolean;
+}
+
+interface TokenMeta {
+  name: string;
+  symbol: string;
+  decimals: number;
+  totalSupply: string;
+}
+
 function ContractTab({ contractId }: { contractId: string }) {
   const { network } = useNetwork();
-  const [method, setMethod] = useState("total_supply");
+  const [methods, setMethods] = useState<AbiMethod[]>([]);
+  const [method, setMethod] = useState("");
   const [args, setArgs] = useState("");
   const [result, setResult] = useState<{ success: boolean; return_data: string; gas_used: number; error?: string } | null>(null);
   const [querying, setQuerying] = useState(false);
+  const [tokenMeta, setTokenMeta] = useState<TokenMeta | null>(null);
 
-  // Auto-query common SRC-20 methods on load.
-  const [tokenInfo, setTokenInfo] = useState<{ totalSupply: string; } | null>(null);
-
+  // Probe contract for ABI and token metadata on load.
   useEffect(() => {
     const api = createApi(network);
-    api.callView(contractId, "total_supply").then((res) => {
-      if (res.success && res.return_data.length >= 32) {
-        const bytes = hexToBytes(res.return_data);
-        const supply = bytesToU128(bytes);
-        setTokenInfo({ totalSupply: supply.toString() });
+
+    // Try to load ABI.
+    api.callView(contractId, "abi").then((res) => {
+      if (res.success && res.return_data) {
+        try {
+          const json = new TextDecoder().decode(hexToBytes(res.return_data));
+          const parsed = JSON.parse(json) as AbiMethod[];
+          setMethods(parsed.filter((m) => !m.mutates && m.name !== "abi"));
+          if (!method) setMethod(parsed.find((m) => !m.mutates && m.name !== "abi")?.name || "");
+        } catch { /* not valid ABI */ }
       }
     }).catch(() => {});
+
+    // Try to load token metadata.
+    Promise.all([
+      api.callView(contractId, "name").catch(() => null),
+      api.callView(contractId, "symbol").catch(() => null),
+      api.callView(contractId, "decimals").catch(() => null),
+      api.callView(contractId, "total_supply").catch(() => null),
+    ]).then(([nameRes, symbolRes, decimalsRes, supplyRes]) => {
+      const name = nameRes?.success ? new TextDecoder().decode(hexToBytes(nameRes.return_data)) : "";
+      const symbol = symbolRes?.success ? new TextDecoder().decode(hexToBytes(symbolRes.return_data)) : "";
+      const decimals = decimalsRes?.success && decimalsRes.return_data.length >= 2
+        ? parseInt(decimalsRes.return_data.slice(0, 2), 16)
+        : 0;
+      const totalSupply = supplyRes?.success && supplyRes.return_data.length >= 32
+        ? bytesToU128(hexToBytes(supplyRes.return_data)).toString()
+        : "";
+
+      if (totalSupply) {
+        setTokenMeta({ name, symbol, decimals, totalSupply });
+      }
+    });
   }, [network, contractId]);
 
   const handleQuery = async () => {
@@ -208,15 +247,42 @@ function ContractTab({ contractId }: { contractId: string }) {
     }
   };
 
+  const selectedMethod = methods.find((m) => m.name === method);
+
   return (
     <div className="space-y-6">
-      {/* Token info summary */}
-      {tokenInfo && (
+      {/* Token metadata */}
+      {tokenMeta && (
         <div className="rounded-lg bg-purple-50 border border-purple-200 p-4">
-          <h3 className="text-sm font-semibold text-purple-900 mb-2">SRC-20 Token</h3>
-          <div className="text-sm text-purple-700">
-            <span className="text-gray-500">Total Supply:</span>{" "}
-            <span className="font-mono font-medium">{formatNumber(Number(tokenInfo.totalSupply))}</span>
+          <div className="flex items-center gap-2 mb-2">
+            <h3 className="text-sm font-semibold text-purple-900">SRC-20 Token</h3>
+            {tokenMeta.symbol && (
+              <span className="text-xs bg-purple-200 text-purple-800 rounded-full px-2 py-0.5 font-medium">
+                {tokenMeta.symbol}
+              </span>
+            )}
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
+            {tokenMeta.name && (
+              <div>
+                <span className="text-gray-500 text-xs">Name</span>
+                <p className="font-medium text-purple-900">{tokenMeta.name}</p>
+              </div>
+            )}
+            {tokenMeta.symbol && (
+              <div>
+                <span className="text-gray-500 text-xs">Symbol</span>
+                <p className="font-medium text-purple-900">{tokenMeta.symbol}</p>
+              </div>
+            )}
+            <div>
+              <span className="text-gray-500 text-xs">Decimals</span>
+              <p className="font-medium text-purple-900">{tokenMeta.decimals}</p>
+            </div>
+            <div>
+              <span className="text-gray-500 text-xs">Total Supply</span>
+              <p className="font-medium text-purple-900">{formatNumber(Number(tokenMeta.totalSupply))}</p>
+            </div>
           </div>
         </div>
       )}
@@ -225,25 +291,39 @@ function ContractTab({ contractId }: { contractId: string }) {
       <div>
         <h3 className="text-sm font-semibold text-gray-900 mb-3">Read Contract</h3>
         <div className="flex flex-col sm:flex-row gap-2">
-          <select
-            value={method}
-            onChange={(e) => setMethod(e.target.value)}
-            className="rounded-lg border border-gray-300 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          >
-            <option value="total_supply">total_supply()</option>
-            <option value="balance_of">balance_of(account)</option>
-            <option value="allowance">allowance(owner, spender)</option>
-          </select>
-          <input
-            type="text"
-            value={args}
-            onChange={(e) => setArgs(e.target.value)}
-            placeholder="Args (hex) — e.g., account ID for balance_of"
-            className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
+          {methods.length > 0 ? (
+            <select
+              value={method}
+              onChange={(e) => { setMethod(e.target.value); setArgs(""); setResult(null); }}
+              className="rounded-lg border border-gray-300 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              {methods.map((m) => (
+                <option key={m.name} value={m.name}>
+                  {m.name}({m.args || ""})
+                </option>
+              ))}
+            </select>
+          ) : (
+            <input
+              type="text"
+              value={method}
+              onChange={(e) => setMethod(e.target.value)}
+              placeholder="Method name"
+              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          )}
+          {selectedMethod?.args && (
+            <input
+              type="text"
+              value={args}
+              onChange={(e) => setArgs(e.target.value)}
+              placeholder={selectedMethod.args.replace(/\+/g, " + ")}
+              className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          )}
           <button
             onClick={handleQuery}
-            disabled={querying}
+            disabled={querying || !method}
             className="rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:bg-gray-400 text-white px-4 py-2 text-sm font-medium transition-colors"
           >
             {querying ? "Querying..." : "Query"}
@@ -260,13 +340,21 @@ function ContractTab({ contractId }: { contractId: string }) {
               <div className="space-y-1">
                 <div>
                   <span className="text-gray-500">Return data:</span>{" "}
-                  <span className="font-mono text-gray-900">{result.return_data}</span>
+                  <span className="font-mono text-gray-900 break-all">{result.return_data}</span>
                 </div>
                 {result.return_data.length === 32 && (
                   <div>
                     <span className="text-gray-500">As u128:</span>{" "}
                     <span className="font-mono text-gray-900 font-medium">
                       {bytesToU128(hexToBytes(result.return_data)).toString()}
+                    </span>
+                  </div>
+                )}
+                {result.return_data.length > 0 && result.return_data.length !== 32 && (
+                  <div>
+                    <span className="text-gray-500">As text:</span>{" "}
+                    <span className="text-gray-900">
+                      {new TextDecoder().decode(hexToBytes(result.return_data))}
                     </span>
                   </div>
                 )}
