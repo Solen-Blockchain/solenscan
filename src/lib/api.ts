@@ -96,5 +96,10 @@ export function createApi(network: NetworkConfig) {
 
     getValidators: () =>
       fetchExplorer<ValidatorSetResponse>(id, "api/validators"),
+
+    callView: (contractId: string, method: string, argsHex?: string) =>
+      rpcCall<{ success: boolean; return_data: string; gas_used: number; error?: string }>(
+        id, "solen_callView", { contract_id: contractId, method, args: argsHex || null }
+      ),
   };
 }
