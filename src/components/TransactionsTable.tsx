@@ -7,24 +7,32 @@ import { truncateHash, formatNumber, formatGas, formatBalance, getTransferInfo, 
 interface TransactionsTableProps {
   transactions: IndexedTx[];
   compact?: boolean;
+  /** If set, only show reward amounts for this specific account. */
+  accountFilter?: string;
 }
 
-export function TransactionsTable({ transactions, compact }: TransactionsTableProps) {
+export function TransactionsTable({ transactions, compact, accountFilter }: TransactionsTableProps) {
   if (compact) {
     return (
       <div className="divide-y divide-gray-100">
         {transactions.map((tx) => {
           const transfer = getTransferInfo(tx.events);
 
-          // Sum ALL reward events (epoch_reward + delegator_reward) in this transaction.
+          // Sum reward events. If accountFilter is set, only sum events for that account.
           const rewardEvents = tx.events.filter((e) => e.topic === "epoch_reward" || e.topic === "delegator_reward");
-          const totalRewardAmount = rewardEvents.reduce((sum, e) => {
+          const filteredRewardEvents = accountFilter
+            ? rewardEvents.filter((e) => {
+                const parsed = parseRewardEvent(e.data);
+                return parsed && parsed.validator === accountFilter;
+              })
+            : rewardEvents;
+          const totalRewardAmount = filteredRewardEvents.reduce((sum, e) => {
             const parsed = parseRewardEvent(e.data);
             return sum + (parsed ? BigInt(parsed.amount) : BigInt(0));
           }, BigInt(0));
-          const isReward = rewardEvents.length > 0;
-          const reward = isReward ? { validator: "", amount: totalRewardAmount.toString() } : null;
-          const rewardCount = rewardEvents.length;
+          const isReward = filteredRewardEvents.length > 0 || (rewardEvents.length > 0 && !accountFilter);
+          const reward = isReward && totalRewardAmount > BigInt(0) ? { validator: "", amount: totalRewardAmount.toString() } : null;
+          const rewardCount = accountFilter ? filteredRewardEvents.length : rewardEvents.length;
 
           const stakeEvent = tx.events.find((e) => e.topic === "delegate" || e.topic === "undelegate");
           const stake = stakeEvent ? parseStakeEvent(stakeEvent.data) : null;
@@ -145,12 +153,18 @@ export function TransactionsTable({ transactions, compact }: TransactionsTablePr
             const transfer = getTransferInfo(tx.events);
 
             const rewardEvents = tx.events.filter((e) => e.topic === "epoch_reward" || e.topic === "delegator_reward");
-            const totalRewardAmount = rewardEvents.reduce((sum, e) => {
+            const filteredRewardEvents = accountFilter
+              ? rewardEvents.filter((e) => {
+                  const parsed = parseRewardEvent(e.data);
+                  return parsed && parsed.validator === accountFilter;
+                })
+              : rewardEvents;
+            const totalRewardAmount = filteredRewardEvents.reduce((sum, e) => {
               const parsed = parseRewardEvent(e.data);
               return sum + (parsed ? BigInt(parsed.amount) : BigInt(0));
             }, BigInt(0));
-            const reward = rewardEvents.length > 0 ? { validator: "", amount: totalRewardAmount.toString() } : null;
-            const rewardCount = rewardEvents.length;
+            const reward = totalRewardAmount > BigInt(0) ? { validator: "", amount: totalRewardAmount.toString() } : null;
+            const rewardCount = filteredRewardEvents.length;
 
             const stakeEvent = tx.events.find((e) => e.topic === "delegate" || e.topic === "undelegate");
             const stake = stakeEvent ? parseStakeEvent(stakeEvent.data) : null;

@@ -160,7 +160,8 @@ export default function TxDetailPage() {
           <div className="divide-y divide-gray-100">
             {tx.events.map((event, i) => {
               const transfer = event.topic === "transfer" ? parseTransferEvent(event.data) : null;
-              const reward = event.topic === "epoch_reward" ? parseRewardEvent(event.data) : null;
+              const reward = (event.topic === "epoch_reward" || event.topic === "delegator_reward") ? parseRewardEvent(event.data) : null;
+              const isDelegatorReward = event.topic === "delegator_reward";
               const stake = (event.topic === "delegate" || event.topic === "undelegate") ? parseStakeEvent(event.data) : null;
               const isDelegate = event.topic === "delegate";
               return (
@@ -207,9 +208,9 @@ export default function TxDetailPage() {
                       </div>
                     )}
                     {reward && (
-                      <div className="mt-2 rounded-lg bg-amber-50 p-3 space-y-1.5">
+                      <div className={`mt-2 rounded-lg p-3 space-y-1.5 ${isDelegatorReward ? "bg-emerald-50" : "bg-amber-50"}`}>
                         <div className="flex items-center gap-1">
-                          <span className="text-xs text-gray-500 w-16">Validator:</span>
+                          <span className="text-xs text-gray-500 w-16">{isDelegatorReward ? "Delegator:" : "Validator:"}</span>
                           <Link
                             href={`/account/${reward.validator}`}
                             className="text-xs text-indigo-600 hover:text-indigo-800 font-mono"
@@ -220,7 +221,7 @@ export default function TxDetailPage() {
                         </div>
                         <div className="flex items-center gap-1">
                           <span className="text-xs text-gray-500 w-16">Reward:</span>
-                          <span className="text-sm font-medium text-amber-700">{formatBalance(reward.amount)} SOLEN</span>
+                          <span className={`text-sm font-medium ${isDelegatorReward ? "text-emerald-700" : "text-amber-700"}`}>{formatBalance(reward.amount)} SOLEN</span>
                           <span className="text-xs text-gray-400 ml-1">(raw: {reward.amount})</span>
                         </div>
                       </div>
