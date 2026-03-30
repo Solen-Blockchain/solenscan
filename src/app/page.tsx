@@ -105,23 +105,23 @@ export default function HomePage() {
           </div>
 
           {chainStatus && chainStatus.total_allocation !== "0" && (
-            <div className="flex flex-row lg:flex-col gap-4 lg:gap-3 lg:text-right">
+            <div className="flex flex-row lg:flex-col gap-3 lg:gap-2 lg:text-right">
               <div>
-                <div className="text-indigo-200 text-xs uppercase tracking-wide">Total Allocation</div>
-                <div className="text-lg sm:text-xl font-bold">
-                  {formatBalance(chainStatus.total_allocation)} <span className="text-sm font-normal text-indigo-200">SOLEN</span>
+                <div className="text-indigo-200 text-[10px] uppercase tracking-wide">Total Allocation</div>
+                <div className="text-sm font-semibold">
+                  {formatBalance(chainStatus.total_allocation)} <span className="text-xs font-normal text-indigo-200">SOLEN</span>
                 </div>
               </div>
               <div>
-                <div className="text-indigo-200 text-xs uppercase tracking-wide">Total Staked</div>
-                <div className="text-lg sm:text-xl font-bold">
-                  {formatBalance(chainStatus.total_staked)} <span className="text-sm font-normal text-indigo-200">SOLEN</span>
+                <div className="text-indigo-200 text-[10px] uppercase tracking-wide">Total Staked</div>
+                <div className="text-sm font-semibold">
+                  {formatBalance(chainStatus.total_staked)} <span className="text-xs font-normal text-indigo-200">SOLEN</span>
                 </div>
               </div>
               <div>
-                <div className="text-indigo-200 text-xs uppercase tracking-wide">Circulating Supply</div>
-                <div className="text-lg sm:text-xl font-bold">
-                  {formatBalance(chainStatus.total_circulation)} <span className="text-sm font-normal text-indigo-200">SOLEN</span>
+                <div className="text-indigo-200 text-[10px] uppercase tracking-wide">Circulating Supply</div>
+                <div className="text-sm font-semibold">
+                  {formatBalance(chainStatus.total_circulation)} <span className="text-xs font-normal text-indigo-200">SOLEN</span>
                 </div>
               </div>
             </div>
