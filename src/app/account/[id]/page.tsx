@@ -22,6 +22,7 @@ export default function AccountPage() {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"txs" | "contract" | "info">("txs");
   const [tokenBalances, setTokenBalances] = useState<{ contract: string; name: string; symbol: string; balance: string }[]>([]);
+  const [isValidator, setIsValidator] = useState<{ active: boolean; genesis: boolean } | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -38,6 +39,15 @@ export default function AccountPage() {
           if (accountInfo.status === "fulfilled") setAccount(accountInfo.value);
           if (accountTxs.status === "fulfilled") setTxs(accountTxs.value);
           setError(null);
+
+          // Check if this account is a validator.
+          api.getValidators().then((vs) => {
+            if (!mounted) return;
+            const v = vs.validators.find((v) => v.id === accountId);
+            if (v) {
+              setIsValidator({ active: v.status === "Active", genesis: v.is_genesis });
+            }
+          }).catch(() => {});
 
           // Fetch token balances for this account.
           api.getAccountTokens(accountId).then(async (contracts) => {
@@ -103,6 +113,16 @@ export default function AccountPage() {
                 : "bg-gray-100 text-gray-700 ring-1 ring-gray-500/20"
             }`}>
               {isContract ? "Smart Account" : "Standard Account"}
+            </span>
+          )}
+          {isValidator && (
+            <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+              isValidator.active
+                ? "bg-green-50 text-green-700 ring-1 ring-green-600/20"
+                : "bg-yellow-50 text-yellow-700 ring-1 ring-yellow-600/20"
+            }`}>
+              <span className={`mr-1 h-1.5 w-1.5 rounded-full ${isValidator.active ? "bg-green-500" : "bg-yellow-500"}`} />
+              {isValidator.genesis ? "Genesis Validator" : "Validator"}
             </span>
           )}
         </div>

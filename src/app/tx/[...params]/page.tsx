@@ -40,6 +40,18 @@ function TokenSymbol({ contractId }: { contractId: string }) {
   return <>{symbol || "tokens"}</>;
 }
 
+function parseLeU128(hex: string): string {
+  const bytes = [];
+  for (let i = 0; i < hex.length && i < 32; i += 2) {
+    bytes.push(parseInt(hex.slice(i, i + 2), 16));
+  }
+  let value = BigInt(0);
+  for (let i = bytes.length - 1; i >= 0; i--) {
+    value = (value << BigInt(8)) | BigInt(bytes[i]);
+  }
+  return value.toString();
+}
+
 function parseTxParams(segments: string[]): { height: number; index: number } | null {
   // /tx/384/0
   if (segments.length === 2) {
@@ -146,42 +158,103 @@ export default function TxDetailPage() {
         </Row>
         {(() => {
           const transfer = getTransferInfo(tx.events, tx.sender);
-          if (!transfer) return null;
-          return (
-            <>
-              <Row label="To">
-                <Link
-                  href={`/account/${transfer.to}`}
-                  className="text-indigo-600 hover:text-indigo-800 font-mono text-sm"
-                >
-                  {transfer.to}
-                </Link>
-                <CopyButton text={transfer.to} />
+          if (transfer) {
+            return (
+              <>
+                <Row label="To">
+                  <Link
+                    href={`/account/${transfer.to}`}
+                    className="text-indigo-600 hover:text-indigo-800 font-mono text-sm"
+                  >
+                    {transfer.to}
+                  </Link>
+                  <CopyButton text={transfer.to} />
+                </Row>
+                <Row label={transfer.tokenContract ? "Token Transfer" : "Value"}>
+                  {transfer.tokenContract ? (
+                    <>
+                      <span className="text-lg font-semibold text-purple-700">
+                        {formatNumber(Number(transfer.amount))} <TokenSymbol contractId={transfer.tokenContract} />
+                      </span>
+                      <span className="ml-2 text-sm text-gray-500">
+                        via contract{" "}
+                        <Link href={`/account/${transfer.tokenContract}`} className="text-indigo-600 hover:text-indigo-800 font-mono">
+                          {truncateHash(transfer.tokenContract, 8)}
+                        </Link>
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-lg font-semibold text-gray-900">
+                        {formatBalance(transfer.amount)} SOLEN
+                      </span>
+                      <span className="ml-2 text-xs text-gray-400">(raw: {transfer.amount})</span>
+                    </>
+                  )}
+                </Row>
+              </>
+            );
+          }
+          // Mint event: to[32] + amount[16]
+          const mintEvent = tx.events.find((e) => e.topic === "mint" && e.data.length >= 96);
+          if (mintEvent) {
+            const to = mintEvent.data.slice(0, 64);
+            const amount = parseLeU128(mintEvent.data.slice(64, 96));
+            return (
+              <>
+                <Row label="Mint To">
+                  <Link href={`/account/${to}`} className="text-indigo-600 hover:text-indigo-800 font-mono text-sm">
+                    {to}
+                  </Link>
+                </Row>
+                <Row label="Amount">
+                  <span className="text-lg font-semibold text-purple-700">
+                    {formatNumber(Number(amount))} <TokenSymbol contractId={mintEvent.emitter} />
+                  </span>
+                </Row>
+              </>
+            );
+          }
+          // Validator registered: validator[32] + amount[16]
+          const regEvent = tx.events.find((e) => e.topic === "validator_registered" && e.data.length >= 96);
+          if (regEvent) {
+            const validator = regEvent.data.slice(0, 64);
+            const amount = parseLeU128(regEvent.data.slice(64, 96));
+            return (
+              <>
+                <Row label="Validator">
+                  <Link href={`/account/${validator}`} className="text-indigo-600 hover:text-indigo-800 font-mono text-sm">
+                    {validator}
+                  </Link>
+                </Row>
+                <Row label="Self Stake">
+                  <span className="text-lg font-semibold text-blue-700">
+                    {formatBalance(amount)} SOLEN
+                  </span>
+                </Row>
+              </>
+            );
+          }
+          // Delegate: validator[32] + amount[16]
+          const delegateEvent = tx.events.find((e) => e.topic === "delegate" && e.data.length >= 96);
+          if (delegateEvent) {
+            const validator = delegateEvent.data.slice(0, 64);
+            const amount = parseLeU128(delegateEvent.data.slice(64, 96));
+            return (
+              <Row label="Staked">
+                <span className="text-lg font-semibold text-blue-700">
+                  {formatBalance(amount)} SOLEN
+                </span>
+                <span className="ml-2 text-sm text-gray-500">
+                  to{" "}
+                  <Link href={`/account/${validator}`} className="text-indigo-600 hover:text-indigo-800 font-mono">
+                    {truncateHash(validator, 8)}
+                  </Link>
+                </span>
               </Row>
-              <Row label={transfer.tokenContract ? "Token Transfer" : "Value"}>
-                {transfer.tokenContract ? (
-                  <>
-                    <span className="text-lg font-semibold text-purple-700">
-                      {formatNumber(Number(transfer.amount))} <TokenSymbol contractId={transfer.tokenContract} />
-                    </span>
-                    <span className="ml-2 text-sm text-gray-500">
-                      via contract{" "}
-                      <Link href={`/account/${transfer.tokenContract}`} className="text-indigo-600 hover:text-indigo-800 font-mono">
-                        {truncateHash(transfer.tokenContract, 8)}
-                      </Link>
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    <span className="text-lg font-semibold text-gray-900">
-                      {formatBalance(transfer.amount)} SOLEN
-                    </span>
-                    <span className="ml-2 text-xs text-gray-400">(raw: {transfer.amount})</span>
-                  </>
-                )}
-              </Row>
-            </>
-          );
+            );
+          }
+          return null;
         })()}
         <Row label="Nonce" value={formatNumber(tx.nonce)} />
         <Row label="Gas Used">
