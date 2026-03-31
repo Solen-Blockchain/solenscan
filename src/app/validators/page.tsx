@@ -1,19 +1,57 @@
 "use client";
 
-import { useCallback } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePolling } from "@/hooks/useApi";
+import { useNetwork } from "@/context/NetworkContext";
 import { createApi } from "@/lib/api";
 import { ValidatorSetResponse } from "@/lib/types";
 import { truncateHash, formatBalance, formatNumber } from "@/lib/utils";
 import { Loading, ErrorMessage } from "@/components/Loading";
 
+interface ValidatorStat {
+  validator: string;
+  blocks_proposed: number;
+  last_proposed_height: number;
+  uptime_pct: number;
+}
+
 export default function ValidatorsPage() {
-  const fetcher = useCallback(
-    (api: ReturnType<typeof createApi>) => api.getValidators(),
-    []
-  );
-  const { data, loading, error } = usePolling<ValidatorSetResponse>(fetcher, 5000);
+  const { network } = useNetwork();
+  const [data, setData] = useState<ValidatorSetResponse | null>(null);
+  const [stats, setStats] = useState<Record<string, ValidatorStat>>({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    const api = createApi(network);
+
+    async function fetch() {
+      try {
+        const [validators, validatorStats] = await Promise.all([
+          api.getValidators(),
+          api.getValidatorStats().catch(() => [] as ValidatorStat[]),
+        ]);
+        if (mounted) {
+          setData(validators);
+          const statsMap: Record<string, ValidatorStat> = {};
+          for (const s of validatorStats) {
+            statsMap[s.validator] = s;
+          }
+          setStats(statsMap);
+          setError(null);
+        }
+      } catch (e) {
+        if (mounted) setError(e instanceof Error ? e.message : "Failed to load");
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    }
+
+    fetch();
+    const id = setInterval(fetch, 5000);
+    return () => { mounted = false; clearInterval(id); };
+  }, [network]);
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8">
@@ -62,8 +100,9 @@ export default function ValidatorsPage() {
                   <th className="px-6 py-3 font-medium">#</th>
                   <th className="px-6 py-3 font-medium">Validator</th>
                   <th className="px-6 py-3 font-medium">Self Stake</th>
-                  <th className="px-6 py-3 font-medium">Delegated</th>
                   <th className="px-6 py-3 font-medium">Stake %</th>
+                  <th className="px-6 py-3 font-medium">Blocks</th>
+                  <th className="px-6 py-3 font-medium">Uptime</th>
                   <th className="px-6 py-3 font-medium">Commission</th>
                   <th className="px-6 py-3 font-medium">Status</th>
                 </tr>
@@ -84,6 +123,7 @@ export default function ValidatorsPage() {
                     const pct = totalStake > BigInt(0)
                       ? Number((stake * BigInt(10000)) / totalStake) / 100
                       : 0;
+                    const stat = stats[v.id];
 
                     return (
                       <tr
@@ -111,12 +151,9 @@ export default function ValidatorsPage() {
                         <td className="px-6 py-4 font-medium text-gray-900">
                           {formatBalance(v.self_stake || v.stake)} SOLEN
                         </td>
-                        <td className="px-6 py-4 text-gray-600">
-                          {formatBalance(v.delegated || "0")} SOLEN
-                        </td>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-2">
-                            <div className="w-20 bg-gray-100 rounded-full h-2">
+                            <div className="w-16 bg-gray-100 rounded-full h-2">
                               <div
                                 className="bg-indigo-600 h-2 rounded-full"
                                 style={{ width: `${Math.min(pct, 100)}%` }}
@@ -126,6 +163,28 @@ export default function ValidatorsPage() {
                               {pct.toFixed(1)}%
                             </span>
                           </div>
+                        </td>
+                        <td className="px-6 py-4 text-gray-700 font-mono text-xs">
+                          {stat ? formatNumber(stat.blocks_proposed) : "—"}
+                        </td>
+                        <td className="px-6 py-4">
+                          {stat ? (
+                            <div className="flex items-center gap-2">
+                              <div className="w-16 bg-gray-100 rounded-full h-2">
+                                <div
+                                  className={`h-2 rounded-full ${
+                                    stat.uptime_pct > 15 ? "bg-green-500" : stat.uptime_pct > 5 ? "bg-yellow-500" : "bg-red-500"
+                                  }`}
+                                  style={{ width: `${Math.min(stat.uptime_pct * (100 / (100 / data.active_count)), 100)}%` }}
+                                />
+                              </div>
+                              <span className="text-gray-600 text-xs">
+                                {stat.uptime_pct.toFixed(1)}%
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="text-gray-400 text-xs">—</span>
+                          )}
                         </td>
                         <td className="px-6 py-4 text-gray-700 font-medium">
                           {v.commission_pct || "10.0%"}
