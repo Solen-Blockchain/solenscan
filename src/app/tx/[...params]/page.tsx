@@ -195,19 +195,27 @@ export default function TxDetailPage() {
               </>
             );
           }
-          // Mint event: to[32] + amount[16]
-          const mintEvent = tx.events.find((e) => e.topic === "mint" && e.data.length >= 96);
+          // Mint event: new format to[32]+amount[16] (96 hex) or old format amount[16] (32 hex)
+          const mintEvent = tx.events.find((e) => e.topic === "mint" && e.data.length >= 32);
           if (mintEvent) {
-            const to = mintEvent.data.slice(0, 64);
-            const amount = parseLeU128(mintEvent.data.slice(64, 96));
+            let to: string | null = null;
+            let amount: string;
+            if (mintEvent.data.length >= 96) {
+              to = mintEvent.data.slice(0, 64);
+              amount = parseLeU128(mintEvent.data.slice(64, 96));
+            } else {
+              amount = parseLeU128(mintEvent.data.slice(0, 32));
+            }
             return (
               <>
-                <Row label="Mint To">
-                  <Link href={`/account/${to}`} className="text-indigo-600 hover:text-indigo-800 font-mono text-sm">
-                    {to}
-                  </Link>
-                </Row>
-                <Row label="Amount">
+                {to && (
+                  <Row label="Mint To">
+                    <Link href={`/account/${to}`} className="text-indigo-600 hover:text-indigo-800 font-mono text-sm">
+                      {to}
+                    </Link>
+                  </Row>
+                )}
+                <Row label="Mint Amount">
                   <span className="text-lg font-semibold text-purple-700">
                     {formatNumber(Number(amount))} <TokenSymbol contractId={mintEvent.emitter} />
                   </span>
