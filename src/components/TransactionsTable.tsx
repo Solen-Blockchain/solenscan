@@ -47,6 +47,15 @@ function TokenAmount({ transfer }: { transfer: { amount: string; tokenContract?:
   return <>{formatBalance(transfer.amount)} SOLEN</>;
 }
 
+function parseMintAmount(hex: string): string {
+  const bytes = hexToBytes(hex);
+  let value = BigInt(0);
+  for (let i = Math.min(bytes.length, 16) - 1; i >= 0; i--) {
+    value = (value << BigInt(8)) | BigInt(bytes[i]);
+  }
+  return value.toString();
+}
+
 interface TransactionsTableProps {
   transactions: IndexedTx[];
   compact?: boolean;
@@ -81,6 +90,14 @@ export function TransactionsTable({ transactions, compact, accountFilter }: Tran
           const stake = stakeEvent ? parseStakeEvent(stakeEvent.data) : null;
           const isStake = stake !== null;
           const isDelegate = stakeEvent?.topic === "delegate";
+
+          // Parse mint events (new format: to[32]+amount[16]=96 hex, old: amount[16]=32 hex)
+          const mintEvent = !transfer ? tx.events.find((e) => e.topic === "mint" && e.data.length >= 32 && !e.emitter.startsWith("ffffffff")) : null;
+          const mintAmount = mintEvent
+            ? mintEvent.data.length >= 96
+              ? parseMintAmount(mintEvent.data.slice(64, 96))
+              : parseMintAmount(mintEvent.data.slice(0, 32))
+            : null;
           return (
             <div
               key={`${tx.block_height}-${tx.index}`}
@@ -90,11 +107,11 @@ export function TransactionsTable({ transactions, compact, accountFilter }: Tran
                 <div className={`flex h-10 w-10 items-center justify-center rounded-lg text-xs font-mono ${
                   isReward
                     ? "bg-amber-50 text-amber-600"
-                    : transfer?.tokenContract
+                    : (transfer?.tokenContract || mintAmount)
                       ? "bg-purple-50 text-purple-600"
                       : tx.success ? "bg-green-50 text-green-600" : "bg-red-50 text-red-600"
                 }`}>
-                  {isReward ? "⛏" : transfer?.tokenContract ? "TK" : "Tx"}
+                  {isReward ? "⛏" : (transfer?.tokenContract || mintAmount) ? "TK" : "Tx"}
                 </div>
                 <div>
                   <div className="flex items-center gap-1.5">
@@ -161,7 +178,12 @@ export function TransactionsTable({ transactions, compact, accountFilter }: Tran
                     {isDelegate ? "Stake " : "Unstake "}{formatBalance(stake.amount)} SOLEN
                   </p>
                 )}
-                {!isReward && !isStake && (tx.success ? (
+                {mintAmount && mintEvent && (
+                  <p className="text-sm font-medium text-purple-700">
+                    <TokenAmount transfer={{ amount: mintAmount, tokenContract: mintEvent.emitter }} />
+                  </p>
+                )}
+                {!isReward && !isStake && !mintAmount && !transfer && (tx.success ? (
                   <span className="inline-flex items-center rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700 ring-1 ring-green-600/20">
                     Success
                   </span>
@@ -214,6 +236,13 @@ export function TransactionsTable({ transactions, compact, accountFilter }: Tran
             const stakeEvent = tx.events.find((e) => e.topic === "delegate" || e.topic === "undelegate");
             const stake = stakeEvent ? parseStakeEvent(stakeEvent.data) : null;
             const isDelegate = stakeEvent?.topic === "delegate";
+
+            const mintEvt = !transfer ? tx.events.find((e) => e.topic === "mint" && e.data.length >= 32 && !e.emitter.startsWith("ffffffff")) : null;
+            const mintAmt = mintEvt
+              ? mintEvt.data.length >= 96
+                ? parseMintAmount(mintEvt.data.slice(64, 96))
+                : parseMintAmount(mintEvt.data.slice(0, 32))
+              : null;
             return (
               <tr
                 key={`${tx.block_height}-${tx.index}`}
@@ -282,6 +311,10 @@ export function TransactionsTable({ transactions, compact, accountFilter }: Tran
                   ) : stake ? (
                     <span className={isDelegate ? "text-blue-700" : "text-orange-700"}>
                       {isDelegate ? "Stake " : "Unstake "}{formatBalance(stake.amount)} SOLEN
+                    </span>
+                  ) : mintAmt && mintEvt ? (
+                    <span className="text-purple-700">
+                      <TokenAmount transfer={{ amount: mintAmt, tokenContract: mintEvt.emitter }} />
                     </span>
                   ) : (
                     <span className="text-gray-400">-</span>
