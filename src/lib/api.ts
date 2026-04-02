@@ -82,7 +82,7 @@ export function createApi(network: NetworkConfig) {
     getRecentTxs: (limit = 50, offset = 0) =>
       fetchExplorer<IndexedTx[]>(id, `api/txs?limit=${limit}&offset=${offset}`),
 
-    getAccountTxs: (account: string, limit = 20, offset = 0) =>
+    getAccountTxs: (account: string, limit = 25, offset = 0) =>
       fetchExplorer<IndexedTx[]>(id, `api/accounts/${account}/txs?limit=${limit}&offset=${offset}`),
 
     getEvents: (limit = 20, offset = 0) =>

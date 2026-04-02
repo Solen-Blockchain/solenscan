@@ -23,6 +23,9 @@ export default function AccountPage() {
   const [activeTab, setActiveTab] = useState<"txs" | "contract" | "holders" | "info">("txs");
   const [tokenBalances, setTokenBalances] = useState<{ contract: string; name: string; symbol: string; balance: string; decimals: number }[]>([]);
   const [isValidator, setIsValidator] = useState<{ active: boolean; genesis: boolean } | null>(null);
+  const [txPage, setTxPage] = useState(0);
+  const [hasMoreTxs, setHasMoreTxs] = useState(false);
+  const TX_PAGE_SIZE = 25;
 
   useEffect(() => {
     let mounted = true;
@@ -32,12 +35,16 @@ export default function AccountPage() {
         const api = createApi(network);
         const [accountInfo, accountTxs] = await Promise.allSettled([
           api.getAccount(accountId),
-          api.getAccountTxs(accountId, 50),
+          api.getAccountTxs(accountId, TX_PAGE_SIZE + 1, txPage * TX_PAGE_SIZE),
         ]);
 
         if (mounted) {
           if (accountInfo.status === "fulfilled") setAccount(accountInfo.value);
-          if (accountTxs.status === "fulfilled") setTxs(accountTxs.value);
+          if (accountTxs.status === "fulfilled") {
+            const fetched = accountTxs.value;
+            setHasMoreTxs(fetched.length > TX_PAGE_SIZE);
+            setTxs(fetched.slice(0, TX_PAGE_SIZE));
+          }
           setError(null);
 
           // Check if this account is a validator.
@@ -98,7 +105,7 @@ export default function AccountPage() {
       mounted = false;
       clearInterval(id);
     };
-  }, [network, accountId]);
+  }, [network, accountId, txPage]);
 
   if (loading) return <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8"><Loading /></div>;
 
@@ -202,7 +209,7 @@ export default function AccountPage() {
         <div className="border-b border-gray-200 bg-gray-50/50">
           <div className="flex gap-0">
             {[
-              { id: "txs" as const, label: `Transactions (${txs.length})` },
+              { id: "txs" as const, label: "Transactions" },
               ...(isContract ? [{ id: "contract" as const, label: "Contract" }, { id: "holders" as const, label: "Holders" }] : []),
               { id: "info" as const, label: "Details" },
             ].map((tab) => (
@@ -224,7 +231,28 @@ export default function AccountPage() {
         <div className="p-6">
           {activeTab === "txs" ? (
             txs.length > 0 ? (
-              <TransactionsTable transactions={txs} accountFilter={accountId} />
+              <>
+                <TransactionsTable transactions={txs} accountFilter={accountId} />
+                <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
+                  <button
+                    onClick={() => setTxPage((p) => Math.max(0, p - 1))}
+                    disabled={txPage === 0}
+                    className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  >
+                    Previous
+                  </button>
+                  <span className="text-sm text-gray-500">
+                    Page {txPage + 1}
+                  </span>
+                  <button
+                    onClick={() => setTxPage((p) => p + 1)}
+                    disabled={!hasMoreTxs}
+                    className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  >
+                    Next
+                  </button>
+                </div>
+              </>
             ) : (
               <p className="py-8 text-center text-gray-400">
                 No transactions found for this account
