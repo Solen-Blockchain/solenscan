@@ -6,11 +6,12 @@ import Link from "next/link";
 import { useNetwork } from "@/context/NetworkContext";
 import { createApi } from "@/lib/api";
 import { IndexedTx } from "@/lib/types";
-import { truncateHash, formatNumber, formatBalance, getTransferInfo, parseTransferEvent, parseRewardEvent, parseStakeEvent } from "@/lib/utils";
+import { truncateHash, formatNumber, formatBalance, formatTokenBalance, getTransferInfo, parseTransferEvent, parseRewardEvent, parseStakeEvent } from "@/lib/utils";
 import { CopyButton } from "@/components/CopyButton";
 import { Loading, ErrorMessage } from "@/components/Loading";
 
 const tokenSymbolCache: Record<string, string> = {};
+const tokenDecimalsCache: Record<string, number> = {};
 
 function hexToBytes(hex: string): Uint8Array {
   const clean = hex.startsWith("0x") ? hex.slice(2) : hex;
@@ -21,23 +22,48 @@ function hexToBytes(hex: string): Uint8Array {
   return bytes;
 }
 
-function TokenSymbol({ contractId }: { contractId: string }) {
+function useTokenMeta(contractId: string) {
   const { network } = useNetwork();
   const [symbol, setSymbol] = useState(tokenSymbolCache[contractId] || "");
+  const [decimals, setDecimals] = useState(tokenDecimalsCache[contractId] ?? 8);
 
   useEffect(() => {
-    if (tokenSymbolCache[contractId]) { setSymbol(tokenSymbolCache[contractId]); return; }
     const api = createApi(network);
-    api.callView(contractId, "symbol").then((res) => {
-      if (res.success) {
-        const sym = new TextDecoder().decode(hexToBytes(res.return_data));
-        tokenSymbolCache[contractId] = sym;
-        setSymbol(sym);
-      }
-    }).catch(() => {});
+    if (!tokenSymbolCache[contractId]) {
+      api.callView(contractId, "symbol").then((res) => {
+        if (res.success) {
+          const sym = new TextDecoder().decode(hexToBytes(res.return_data));
+          tokenSymbolCache[contractId] = sym;
+          setSymbol(sym);
+        }
+      }).catch(() => {});
+    } else {
+      setSymbol(tokenSymbolCache[contractId]);
+    }
+    if (tokenDecimalsCache[contractId] === undefined) {
+      api.callView(contractId, "decimals").then((res) => {
+        if (res.success && res.return_data.length >= 2) {
+          const dec = parseInt(res.return_data.slice(0, 2), 16);
+          tokenDecimalsCache[contractId] = dec;
+          setDecimals(dec);
+        }
+      }).catch(() => {});
+    } else {
+      setDecimals(tokenDecimalsCache[contractId]);
+    }
   }, [contractId, network]);
 
-  return <>{symbol || "tokens"}</>;
+  return { symbol: symbol || "tokens", decimals };
+}
+
+function TokenSymbol({ contractId }: { contractId: string }) {
+  const { symbol } = useTokenMeta(contractId);
+  return <>{symbol}</>;
+}
+
+function TokenAmount({ amount, contractId }: { amount: string; contractId: string }) {
+  const { symbol, decimals } = useTokenMeta(contractId);
+  return <>{formatTokenBalance(amount, decimals)} {symbol}</>;
 }
 
 function parseLeU128(hex: string): string {
@@ -174,7 +200,7 @@ export default function TxDetailPage() {
                   {transfer.tokenContract ? (
                     <>
                       <span className="text-lg font-semibold text-purple-700">
-                        {formatNumber(Number(transfer.amount))} <TokenSymbol contractId={transfer.tokenContract} />
+                        <TokenAmount amount={transfer.amount} contractId={transfer.tokenContract} />
                       </span>
                       <span className="ml-2 text-sm text-gray-500">
                         via contract{" "}
@@ -217,7 +243,7 @@ export default function TxDetailPage() {
                 )}
                 <Row label="Mint Amount">
                   <span className="text-lg font-semibold text-purple-700">
-                    {formatNumber(Number(amount))} <TokenSymbol contractId={mintEvent.emitter} />
+                    <TokenAmount amount={amount} contractId={mintEvent.emitter} />
                   </span>
                 </Row>
               </>

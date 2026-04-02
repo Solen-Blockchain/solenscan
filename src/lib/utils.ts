@@ -41,6 +41,17 @@ export function formatBalance(raw: string | number): string {
   return `${whole.toLocaleString()}.${fracStr}`;
 }
 
+export function formatTokenBalance(raw: string, decimals: number): string {
+  const n = BigInt(raw);
+  if (decimals === 0) return n.toLocaleString();
+  const divisor = BigInt(10) ** BigInt(decimals);
+  const whole = n / divisor;
+  const frac = n % divisor;
+  if (frac === BigInt(0)) return whole.toLocaleString();
+  const fracStr = frac.toString().padStart(decimals, "0").replace(/0+$/, "");
+  return `${whole.toLocaleString()}.${fracStr}`;
+}
+
 export interface TransferInfo {
   to: string;
   amount: string;

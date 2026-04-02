@@ -7,8 +7,20 @@ import { createApi } from "@/lib/api";
 import { IndexedTx } from "@/lib/types";
 import { truncateHash, formatNumber, formatGas, formatBalance, getTransferInfo, parseRewardEvent, parseStakeEvent } from "@/lib/utils";
 
-// Global cache for token symbols.
+// Global cache for token symbols and decimals.
 const tokenSymbolCache: Record<string, string> = {};
+const tokenDecimalsCache: Record<string, number> = {};
+
+function formatTokenBalance(raw: string, decimals: number): string {
+  const n = BigInt(raw);
+  if (decimals === 0) return n.toLocaleString();
+  const divisor = BigInt(10) ** BigInt(decimals);
+  const whole = n / divisor;
+  const frac = n % divisor;
+  if (frac === BigInt(0)) return whole.toLocaleString();
+  const fracStr = frac.toString().padStart(decimals, "0").replace(/0+$/, "");
+  return `${whole.toLocaleString()}.${fracStr}`;
+}
 
 function hexToBytes(hex: string): Uint8Array {
   const clean = hex.startsWith("0x") ? hex.slice(2) : hex;
@@ -24,25 +36,41 @@ function TokenAmount({ transfer }: { transfer: { amount: string; tokenContract?:
   const [symbol, setSymbol] = useState(
     transfer.tokenContract ? tokenSymbolCache[transfer.tokenContract] || "" : ""
   );
+  const [decimals, setDecimals] = useState(
+    transfer.tokenContract ? tokenDecimalsCache[transfer.tokenContract] ?? 8 : 8
+  );
 
   useEffect(() => {
     if (!transfer.tokenContract) return;
-    if (tokenSymbolCache[transfer.tokenContract]) {
-      setSymbol(tokenSymbolCache[transfer.tokenContract]);
-      return;
-    }
     const api = createApi(network);
-    api.callView(transfer.tokenContract, "symbol").then((res) => {
-      if (res.success) {
-        const sym = new TextDecoder().decode(hexToBytes(res.return_data));
-        tokenSymbolCache[transfer.tokenContract!] = sym;
-        setSymbol(sym);
-      }
-    }).catch(() => {});
+
+    if (!tokenSymbolCache[transfer.tokenContract]) {
+      api.callView(transfer.tokenContract, "symbol").then((res) => {
+        if (res.success) {
+          const sym = new TextDecoder().decode(hexToBytes(res.return_data));
+          tokenSymbolCache[transfer.tokenContract!] = sym;
+          setSymbol(sym);
+        }
+      }).catch(() => {});
+    } else {
+      setSymbol(tokenSymbolCache[transfer.tokenContract]);
+    }
+
+    if (tokenDecimalsCache[transfer.tokenContract] === undefined) {
+      api.callView(transfer.tokenContract, "decimals").then((res) => {
+        if (res.success && res.return_data.length >= 2) {
+          const dec = parseInt(res.return_data.slice(0, 2), 16);
+          tokenDecimalsCache[transfer.tokenContract!] = dec;
+          setDecimals(dec);
+        }
+      }).catch(() => {});
+    } else {
+      setDecimals(tokenDecimalsCache[transfer.tokenContract]);
+    }
   }, [transfer.tokenContract, network]);
 
   if (transfer.tokenContract) {
-    return <>{formatNumber(Number(transfer.amount))} {symbol || "tokens"}</>;
+    return <>{formatTokenBalance(transfer.amount, decimals)} {symbol || "tokens"}</>;
   }
   return <>{formatBalance(transfer.amount)} SOLEN</>;
 }

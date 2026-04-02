@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useNetwork } from "@/context/NetworkContext";
 import { createApi } from "@/lib/api";
 import { AccountInfo, IndexedTx } from "@/lib/types";
-import { formatBalance, formatNumber, isContractAccount, truncateHash } from "@/lib/utils";
+import { formatBalance, formatNumber, formatTokenBalance, isContractAccount, truncateHash } from "@/lib/utils";
 import { CopyButton } from "@/components/CopyButton";
 import { TransactionsTable } from "@/components/TransactionsTable";
 import { Loading, ErrorMessage } from "@/components/Loading";
@@ -21,7 +21,7 @@ export default function AccountPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"txs" | "contract" | "holders" | "info">("txs");
-  const [tokenBalances, setTokenBalances] = useState<{ contract: string; name: string; symbol: string; balance: string }[]>([]);
+  const [tokenBalances, setTokenBalances] = useState<{ contract: string; name: string; symbol: string; balance: string; decimals: number }[]>([]);
   const [isValidator, setIsValidator] = useState<{ active: boolean; genesis: boolean } | null>(null);
 
   useEffect(() => {
@@ -55,20 +55,24 @@ export default function AccountPage() {
             const balances = await Promise.all(
               contracts.map(async (contractId) => {
                 try {
-                  const [balRes, nameRes, symRes] = await Promise.all([
+                  const [balRes, nameRes, symRes, decRes] = await Promise.all([
                     api.callView(contractId, "balance_of", accountId),
                     api.callView(contractId, "name"),
                     api.callView(contractId, "symbol"),
+                    api.callView(contractId, "decimals"),
                   ]);
                   if (!balRes.success) return null;
                   const balBytes = hexToBytes(balRes.return_data);
                   const bal = bytesToU128(balBytes);
                   if (bal === BigInt(0)) return null;
+                  const decimals = decRes.success && decRes.return_data.length >= 2
+                    ? parseInt(decRes.return_data.slice(0, 2), 16) : 8;
                   return {
                     contract: contractId,
                     name: nameRes.success ? new TextDecoder().decode(hexToBytes(nameRes.return_data)) : contractId.slice(0, 12) + "...",
                     symbol: symRes.success ? new TextDecoder().decode(hexToBytes(symRes.return_data)) : "???",
                     balance: bal.toString(),
+                    decimals,
                   };
                 } catch { return null; }
               })
@@ -185,7 +189,7 @@ export default function AccountPage() {
                   </Link>
                 </div>
                 <span className="font-mono text-sm font-medium text-gray-900">
-                  {formatNumber(Number(token.balance))}
+                  {formatTokenBalance(token.balance, token.decimals)}
                 </span>
               </div>
             ))}
@@ -385,7 +389,7 @@ function ContractTab({ contractId, account }: { contractId: string; account: Acc
             </div>
             <div>
               <span className="text-gray-500 text-xs">Total Supply</span>
-              <p className="font-medium text-purple-900">{formatNumber(Number(tokenMeta.totalSupply))}</p>
+              <p className="font-medium text-purple-900">{formatTokenBalance(tokenMeta.totalSupply, tokenMeta.decimals)}</p>
             </div>
           </div>
           {owner && (
