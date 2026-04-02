@@ -11,6 +11,7 @@ import {
   IndexedRollup,
   IndexedBatch,
   RollupDetail,
+  IntentInfo,
   RpcResponse,
 } from "./types";
 
@@ -137,5 +138,13 @@ export function createApi(network: NetworkConfig) {
 
     getRollupBatches: (rollupId: number, limit = 20) =>
       fetchExplorer<IndexedBatch[]>(id, `api/rollups/${rollupId}/batches?limit=${limit}`),
+
+    getPendingIntents: (limit = 50) =>
+      rpcCall<IntentInfo[]>(id, "solen_getPendingIntents", { limit }),
+
+    getFulfilledIntents: (limit = 50) =>
+      fetchExplorer<{ intent_id: number; sender: string; block_height: number; tx_index: number; transfer_to: string | null; transfer_amount: string | null; solver_tip: string | null; solver: string | null }[]>(
+        id, `api/intents?limit=${limit}`
+      ),
   };
 }

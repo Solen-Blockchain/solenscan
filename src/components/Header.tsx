@@ -17,6 +17,7 @@ const navItems = [
   { href: "/contracts", label: "Contracts" },
   { href: "/governance", label: "Governance" },
   { href: "/rollups", label: "Rollups" },
+  { href: "/intents", label: "Intents" },
 ];
 
 export function Header() {

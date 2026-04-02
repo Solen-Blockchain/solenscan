@@ -106,6 +106,16 @@ export interface RollupDetail extends IndexedRollup {
   latest_batch: IndexedBatch | null;
 }
 
+export interface IntentInfo {
+  id: number;
+  sender: string;
+  constraints: { type: string; [key: string]: string }[];
+  max_fee: string;
+  expiry_height: number;
+  tip: string;
+  status: string;
+}
+
 export interface RpcResponse<T> {
   jsonrpc: string;
   id: number;
