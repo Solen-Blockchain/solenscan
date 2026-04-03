@@ -152,6 +152,27 @@ export function parseStakeEvent(data: string): StakeInfo | null {
   return { validator, amount: amount.toString() };
 }
 
+export interface SlashInfo {
+  validator: string;
+  amount: string;
+}
+
+export function parseSlashEvent(data: string): SlashInfo | null {
+  // Slash event data: [offender (32 bytes = 64 hex chars)][penalty (16 bytes = 32 hex chars)]
+  if (data.length < 96) return null;
+  const validator = data.slice(0, 64);
+  const amountHex = data.slice(64, 96);
+  const bytes = [];
+  for (let i = 0; i < amountHex.length; i += 2) {
+    bytes.push(parseInt(amountHex.slice(i, i + 2), 16));
+  }
+  let amount = BigInt(0);
+  for (let i = bytes.length - 1; i >= 0; i--) {
+    amount = (amount << BigInt(8)) | BigInt(bytes[i]);
+  }
+  return { validator, amount: amount.toString() };
+}
+
 export function isContractAccount(codeHash: string): boolean {
   return codeHash !== "0".repeat(64) && codeHash !== "";
 }

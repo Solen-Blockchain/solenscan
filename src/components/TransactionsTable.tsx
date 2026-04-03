@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useNetwork } from "@/context/NetworkContext";
 import { createApi } from "@/lib/api";
 import { IndexedTx } from "@/lib/types";
-import { truncateHash, formatNumber, formatGas, formatBalance, getTransferInfo, parseRewardEvent, parseStakeEvent } from "@/lib/utils";
+import { truncateHash, formatNumber, formatGas, formatBalance, getTransferInfo, parseRewardEvent, parseStakeEvent, parseSlashEvent } from "@/lib/utils";
 
 // Global cache for token symbols and decimals.
 const tokenSymbolCache: Record<string, string> = {};
@@ -123,6 +123,11 @@ export function TransactionsTable({ transactions, compact, accountFilter }: Tran
           const isStake = stake !== null;
           const isDelegate = stakeEvent?.topic === "delegate";
 
+          // Slash detection.
+          const slashEvent = tx.events.find((e) => e.topic === "slashed");
+          const slash = slashEvent ? parseSlashEvent(slashEvent.data) : null;
+          const isSlash = slash !== null;
+
           // Intent fulfillment detection.
           const isIntent = tx.events.some((e) => e.topic === "intent_fulfilled");
           const solverTipEvent = tx.events.find((e) => e.topic === "solver_tip");
@@ -144,15 +149,17 @@ export function TransactionsTable({ transactions, compact, accountFilter }: Tran
             >
               <div className="flex items-center gap-3">
                 <div className={`flex h-10 w-10 items-center justify-center rounded-lg text-xs font-mono ${
-                  isIntent
-                    ? "bg-cyan-50 text-cyan-600"
-                    : isReward
-                      ? "bg-amber-50 text-amber-600"
-                      : (transfer?.tokenContract || mintAmount)
-                        ? "bg-purple-50 text-purple-600"
-                        : tx.success ? "bg-green-50 text-green-600" : "bg-red-50 text-red-600"
+                  isSlash
+                    ? "bg-red-50 text-red-600"
+                    : isIntent
+                      ? "bg-cyan-50 text-cyan-600"
+                      : isReward
+                        ? "bg-amber-50 text-amber-600"
+                        : (transfer?.tokenContract || mintAmount)
+                          ? "bg-purple-50 text-purple-600"
+                          : tx.success ? "bg-green-50 text-green-600" : "bg-red-50 text-red-600"
                 }`}>
-                  {isIntent ? "⚡" : isReward ? "⛏" : (transfer?.tokenContract || mintAmount) ? "TK" : "Tx"}
+                  {isSlash ? "⚠" : isIntent ? "⚡" : isReward ? "⛏" : (transfer?.tokenContract || mintAmount) ? "TK" : "Tx"}
                 </div>
                 <div>
                   <div className="flex items-center gap-1.5">
@@ -162,6 +169,11 @@ export function TransactionsTable({ transactions, compact, accountFilter }: Tran
                     >
                       #{formatNumber(tx.block_height)}-{tx.index}
                     </Link>
+                    {isSlash && (
+                      <span className="inline-flex items-center rounded-md bg-red-50 px-1.5 py-0.5 text-xs font-medium text-red-700">
+                        Slash
+                      </span>
+                    )}
                     {isIntent && (
                       <span className="inline-flex items-center rounded-md bg-cyan-50 px-1.5 py-0.5 text-xs font-medium text-cyan-700">
                         Intent
@@ -174,7 +186,17 @@ export function TransactionsTable({ transactions, compact, accountFilter }: Tran
                     )}
                   </div>
                   <div className="flex items-center gap-1 text-xs text-gray-400">
-                    {isReward ? (
+                    {isSlash && slash ? (
+                      <>
+                        <span className="text-red-600">Slashed</span>
+                        <Link
+                          href={`/account/${slash.validator}`}
+                          className="hover:text-indigo-600 font-mono"
+                        >
+                          {truncateHash(slash.validator, 4)}
+                        </Link>
+                      </>
+                    ) : isReward ? (
                       <>
                         <span className="text-amber-600">Epoch Rewards · {rewardCount} payouts</span>
                       </>
@@ -204,6 +226,11 @@ export function TransactionsTable({ transactions, compact, accountFilter }: Tran
                 </div>
               </div>
               <div className="text-right">
+                {slash && (
+                  <p className="text-sm font-medium text-red-700">
+                    -{formatBalance(slash.amount)} SOLEN
+                  </p>
+                )}
                 {transfer && (
                   <p className={`text-sm font-medium ${transfer.tokenContract ? "text-purple-700" : "text-gray-900"}`}>
                     <TokenAmount transfer={transfer} />
@@ -288,6 +315,9 @@ export function TransactionsTable({ transactions, compact, accountFilter }: Tran
             const stake = stakeEvent ? parseStakeEvent(stakeEvent.data) : null;
             const isDelegate = stakeEvent?.topic === "delegate";
 
+            const slashEvt = tx.events.find((e) => e.topic === "slashed");
+            const slashInfo = slashEvt ? parseSlashEvent(slashEvt.data) : null;
+
             const isIntent = tx.events.some((e) => e.topic === "intent_fulfilled");
             const solverTipEvt = tx.events.find((e) => e.topic === "solver_tip");
             const solverTip = solverTipEvt && solverTipEvt.data.length >= 96
@@ -336,7 +366,14 @@ export function TransactionsTable({ transactions, compact, accountFilter }: Tran
                   )}
                 </td>
                 <td className="py-3 pr-4">
-                  {reward ? (
+                  {slashInfo ? (
+                    <Link
+                      href={`/account/${slashInfo.validator}`}
+                      className="text-red-600 hover:text-red-800 font-mono text-xs"
+                    >
+                      {truncateHash(slashInfo.validator)}
+                    </Link>
+                  ) : reward ? (
                     accountFilter ? (
                       <Link
                         href={`/account/${accountFilter}`}
@@ -359,7 +396,9 @@ export function TransactionsTable({ transactions, compact, accountFilter }: Tran
                   )}
                 </td>
                 <td className="py-3 pr-4 font-medium">
-                  {reward ? (
+                  {slashInfo ? (
+                    <span className="text-red-700">-{formatBalance(slashInfo.amount)} SOLEN</span>
+                  ) : reward ? (
                     <span className="text-amber-700" title={`${rewardCount} payouts`}>+{formatBalance(reward.amount)} SOLEN</span>
                   ) : transfer ? (
                     <div>
@@ -383,7 +422,11 @@ export function TransactionsTable({ transactions, compact, accountFilter }: Tran
                   )}
                 </td>
                 <td className="py-3 pr-4">
-                  {isIntent ? (
+                  {slashInfo ? (
+                    <span className="inline-flex items-center rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700 ring-1 ring-red-600/20">
+                      Slash
+                    </span>
+                  ) : isIntent ? (
                     <span className="inline-flex items-center rounded-full bg-cyan-50 px-2 py-0.5 text-xs font-medium text-cyan-700 ring-1 ring-cyan-600/20">
                       Intent
                     </span>

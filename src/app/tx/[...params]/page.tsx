@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useNetwork } from "@/context/NetworkContext";
 import { createApi } from "@/lib/api";
 import { IndexedTx } from "@/lib/types";
-import { truncateHash, formatNumber, formatBalance, formatTokenBalance, getTransferInfo, parseTransferEvent, parseRewardEvent, parseStakeEvent } from "@/lib/utils";
+import { truncateHash, formatNumber, formatBalance, formatTokenBalance, getTransferInfo, parseTransferEvent, parseRewardEvent, parseStakeEvent, parseSlashEvent } from "@/lib/utils";
 import { CopyButton } from "@/components/CopyButton";
 import { Loading, ErrorMessage } from "@/components/Loading";
 
@@ -361,6 +361,7 @@ export default function TxDetailPage() {
               const isDelegatorReward = event.topic === "delegator_reward";
               const stake = (event.topic === "delegate" || event.topic === "undelegate") ? parseStakeEvent(event.data) : null;
               const isDelegate = event.topic === "delegate";
+              const slashData = event.topic === "slashed" ? parseSlashEvent(event.data) : null;
               const isSolverTip = event.topic === "solver_tip" && event.data.length >= 96;
               const solverTipTo = isSolverTip ? event.data.slice(0, 64) : null;
               const solverTipAmt = isSolverTip ? parseLeU128(event.data.slice(64, 96)) : null;
@@ -371,11 +372,13 @@ export default function TxDetailPage() {
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 mb-2">
                       <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ${
-                        event.topic === "epoch_reward" || event.topic === "delegator_reward"
-                          ? "bg-amber-50 text-amber-700"
-                          : event.topic === "solver_tip" || event.topic === "intent_fulfilled"
-                            ? "bg-cyan-50 text-cyan-700"
-                            : "bg-purple-50 text-purple-700"
+                        event.topic === "slashed"
+                          ? "bg-red-50 text-red-700"
+                          : event.topic === "epoch_reward" || event.topic === "delegator_reward"
+                            ? "bg-amber-50 text-amber-700"
+                            : event.topic === "solver_tip" || event.topic === "intent_fulfilled"
+                              ? "bg-cyan-50 text-cyan-700"
+                              : "bg-purple-50 text-purple-700"
                       }`}>
                         {event.topic}
                       </span>
@@ -461,6 +464,25 @@ export default function TxDetailPage() {
                         </div>
                       </div>
                     )}
+                    {slashData && (
+                      <div className="mt-2 rounded-lg bg-red-50 p-3 space-y-1.5">
+                        <div className="flex items-center gap-1">
+                          <span className="text-xs text-gray-500 w-16">Validator:</span>
+                          <Link
+                            href={`/account/${slashData.validator}`}
+                            className="text-xs text-indigo-600 hover:text-indigo-800 font-mono"
+                          >
+                            {truncateHash(slashData.validator, 12)}
+                          </Link>
+                          <CopyButton text={slashData.validator} />
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className="text-xs text-gray-500 w-16">Penalty:</span>
+                          <span className="text-sm font-medium text-red-700">-{formatBalance(slashData.amount)} SOLEN</span>
+                          <span className="text-xs text-gray-400 ml-1">(raw: {slashData.amount})</span>
+                        </div>
+                      </div>
+                    )}
                     {isSolverTip && solverTipTo && solverTipAmt && (
                       <div className="mt-2 rounded-lg bg-cyan-50 p-3 space-y-1.5">
                         <div className="flex items-center gap-1">
@@ -490,7 +512,7 @@ export default function TxDetailPage() {
                         </div>
                       </div>
                     )}
-                    {!transfer && !reward && !stake && !isSolverTip && !isIntentFulfilled && event.data && event.data !== "" && event.data !== "00" && (
+                    {!transfer && !reward && !stake && !slashData && !isSolverTip && !isIntentFulfilled && event.data && event.data !== "" && event.data !== "00" && (
                       <div className="mt-2 rounded-lg bg-gray-50 p-3">
                         <span className="text-xs text-gray-500">Data:</span>
                         <p className="text-xs font-mono text-gray-700 mt-0.5 break-all">{event.data}</p>
