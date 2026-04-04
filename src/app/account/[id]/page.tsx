@@ -6,15 +6,37 @@ import Link from "next/link";
 import { useNetwork } from "@/context/NetworkContext";
 import { createApi } from "@/lib/api";
 import { AccountInfo, IndexedTx } from "@/lib/types";
-import { formatBalance, formatNumber, formatTokenBalance, isContractAccount, truncateHash, hexToBase58 } from "@/lib/utils";
+import { formatBalance, formatNumber, formatTokenBalance, isContractAccount, truncateHash, hexToBase58, base58Decode, base58Encode } from "@/lib/utils";
 import { CopyButton } from "@/components/CopyButton";
 import { TransactionsTable } from "@/components/TransactionsTable";
 import { Loading, ErrorMessage } from "@/components/Loading";
 
 export default function AccountPage() {
   const params = useParams();
-  const accountId = params.id as string;
+  const rawId = params.id as string;
   const { network } = useNetwork();
+
+  // Derive both Base58 (Account ID) and hex (Public Key) from whatever format the URL uses.
+  const { displayId, publicKeyHex } = (() => {
+    const clean = rawId.startsWith("0x") ? rawId.slice(2) : rawId;
+    // If 64 hex chars, input is a public key — convert to Base58 for display.
+    if (clean.length === 64 && /^[0-9a-fA-F]+$/.test(clean)) {
+      return { displayId: hexToBase58(clean), publicKeyHex: clean };
+    }
+    // Otherwise assume Base58 — decode to get hex public key.
+    try {
+      const bytes = base58Decode(rawId);
+      if (bytes.length === 32) {
+        const hex = Array.from(bytes).map(b => b.toString(16).padStart(2, "0")).join("");
+        return { displayId: rawId, publicKeyHex: hex };
+      }
+    } catch {}
+    // Fallback: use as-is.
+    return { displayId: rawId, publicKeyHex: rawId };
+  })();
+
+  // Use the raw URL param for API calls (RPC accepts both formats).
+  const accountId = rawId;
 
   const [account, setAccount] = useState<AccountInfo | null>(null);
   const [txs, setTxs] = useState<IndexedTx[]>([]);
@@ -139,9 +161,9 @@ export default function AccountPage() {
         </div>
         <div className="flex items-center gap-1">
           <p className="font-mono text-sm text-gray-500 dark:text-gray-400 break-all">
-            {accountId}
+            {displayId}
           </p>
-          <CopyButton text={accountId} />
+          <CopyButton text={displayId} />
         </div>
       </div>
 
@@ -176,6 +198,31 @@ export default function AccountPage() {
             ) : (
               <p className="mt-1.5 text-sm text-gray-400 dark:text-gray-500">No contract deployed</p>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Account details */}
+      {account && (
+        <div className="mb-6 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-900 shadow-sm overflow-hidden">
+          <div className="px-5 py-3 border-b border-gray-100 dark:border-gray-800">
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Details</h3>
+          </div>
+          <div className="divide-y divide-gray-100 dark:divide-gray-800">
+            <div className="flex flex-col sm:flex-row px-5 py-3 gap-1 sm:gap-4">
+              <span className="text-xs text-gray-500 dark:text-gray-400 sm:w-32 shrink-0">Account ID</span>
+              <div className="flex items-center gap-1 min-w-0">
+                <span className="font-mono text-sm text-gray-900 dark:text-gray-100 break-all">{displayId}</span>
+                <CopyButton text={displayId} />
+              </div>
+            </div>
+            <div className="flex flex-col sm:flex-row px-5 py-3 gap-1 sm:gap-4">
+              <span className="text-xs text-gray-500 dark:text-gray-400 sm:w-32 shrink-0">Public Key</span>
+              <div className="flex items-center gap-1 min-w-0">
+                <span className="font-mono text-xs text-gray-600 dark:text-gray-400 break-all">{publicKeyHex}</span>
+                <CopyButton text={publicKeyHex} />
+              </div>
+            </div>
           </div>
         </div>
       )}
