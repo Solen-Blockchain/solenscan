@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useNetwork } from "@/context/NetworkContext";
 import { createApi } from "@/lib/api";
 import { IndexedTx } from "@/lib/types";
-import { truncateHash, formatNumber, formatGas, formatBalance, getTransferInfo, parseRewardEvent, parseStakeEvent, parseSlashEvent } from "@/lib/utils";
+import { truncateHash, formatNumber, formatGas, formatBalance, getTransferInfo, parseRewardEvent, parseStakeEvent, parseSlashEvent, hexToBase58 } from "@/lib/utils";
 
 // Global cache for token symbols and decimals.
 const tokenSymbolCache: Record<string, string> = {};
@@ -132,7 +132,7 @@ export function TransactionsTable({ transactions, compact, accountFilter }: Tran
           const isIntent = tx.events.some((e) => e.topic === "intent_fulfilled");
           const solverTipEvent = tx.events.find((e) => e.topic === "solver_tip");
           const solverTip = solverTipEvent && solverTipEvent.data.length >= 96
-            ? { solver: solverTipEvent.data.slice(0, 64), amount: parseLeU128(solverTipEvent.data.slice(64, 96)) }
+            ? { solver: hexToBase58(solverTipEvent.data.slice(0, 64)), amount: parseLeU128(solverTipEvent.data.slice(64, 96)) }
             : null;
 
           // Parse mint events (new format: to[32]+amount[16]=96 hex, old: amount[16]=32 hex)
@@ -321,7 +321,7 @@ export function TransactionsTable({ transactions, compact, accountFilter }: Tran
             const isIntent = tx.events.some((e) => e.topic === "intent_fulfilled");
             const solverTipEvt = tx.events.find((e) => e.topic === "solver_tip");
             const solverTip = solverTipEvt && solverTipEvt.data.length >= 96
-              ? { solver: solverTipEvt.data.slice(0, 64), amount: parseLeU128(solverTipEvt.data.slice(64, 96)) }
+              ? { solver: hexToBase58(solverTipEvt.data.slice(0, 64)), amount: parseLeU128(solverTipEvt.data.slice(64, 96)) }
               : null;
 
             const mintEvt = !transfer ? tx.events.find((e) => e.topic === "mint" && e.data.length >= 32 && !e.emitter.startsWith("ffffffff")) : null;

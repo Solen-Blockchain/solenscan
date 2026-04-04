@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useNetwork } from "@/context/NetworkContext";
 import { createApi } from "@/lib/api";
 import { AccountInfo, IndexedTx } from "@/lib/types";
-import { formatBalance, formatNumber, formatTokenBalance, isContractAccount, truncateHash } from "@/lib/utils";
+import { formatBalance, formatNumber, formatTokenBalance, isContractAccount, truncateHash, hexToBase58 } from "@/lib/utils";
 import { CopyButton } from "@/components/CopyButton";
 import { TransactionsTable } from "@/components/TransactionsTable";
 import { Loading, ErrorMessage } from "@/components/Loading";
@@ -364,7 +364,7 @@ function ContractTab({ contractId, account }: { contractId: string; account: Acc
     // Try to get contract owner.
     api.callView(contractId, "owner").catch(() => null).then((res) => {
       if (res?.success && res.return_data.length === 64) {
-        setOwner(res.return_data);
+        setOwner(hexToBase58(res.return_data));
       }
     });
   }, [network, contractId]);

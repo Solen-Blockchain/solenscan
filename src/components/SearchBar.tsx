@@ -45,6 +45,6 @@ export function resolveSearch(q: string): string {
   if (/^\d+$/.test(q)) {
     return `/block/${q}`;
   }
-  // Account ID: hex string
+  // Account ID: hex or Base58 address
   return `/account/${q}`;
 }

@@ -1,3 +1,60 @@
+// --- Base58 (Bitcoin alphabet) ---
+const BASE58_ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+
+export function base58Encode(bytes: Uint8Array): string {
+  let zeros = 0;
+  for (const b of bytes) {
+    if (b !== 0) break;
+    zeros++;
+  }
+  let num = BigInt(0);
+  for (const b of bytes) {
+    num = num * BigInt(256) + BigInt(b);
+  }
+  const chars: string[] = [];
+  while (num > BigInt(0)) {
+    const remainder = Number(num % BigInt(58));
+    num = num / BigInt(58);
+    chars.unshift(BASE58_ALPHABET[remainder]);
+  }
+  for (let i = 0; i < zeros; i++) {
+    chars.unshift("1");
+  }
+  return chars.join("");
+}
+
+export function base58Decode(str: string): Uint8Array {
+  let zeros = 0;
+  for (const c of str) {
+    if (c !== "1") break;
+    zeros++;
+  }
+  let num = BigInt(0);
+  for (const c of str) {
+    const idx = BASE58_ALPHABET.indexOf(c);
+    if (idx === -1) throw new Error(`Invalid Base58 character: ${c}`);
+    num = num * BigInt(58) + BigInt(idx);
+  }
+  const hex = num === BigInt(0) ? "" : num.toString(16).padStart(2, "0");
+  const paddedHex = hex.length % 2 ? "0" + hex : hex;
+  const byteLen = paddedHex.length / 2;
+  const result = new Uint8Array(zeros + byteLen);
+  for (let i = 0; i < byteLen; i++) {
+    result[zeros + i] = parseInt(paddedHex.slice(i * 2, i * 2 + 2), 16);
+  }
+  return result;
+}
+
+/** Convert a 64-char hex address (from raw event data) to Base58. */
+export function hexToBase58(hex: string): string {
+  const clean = hex.startsWith("0x") ? hex.slice(2) : hex;
+  const bytes = new Uint8Array(clean.length / 2);
+  for (let i = 0; i < clean.length; i += 2) {
+    bytes[i / 2] = parseInt(clean.substring(i, i + 2), 16);
+  }
+  return base58Encode(bytes);
+}
+
 export function truncateHash(hash: string, chars = 8): string {
   if (hash.length <= chars * 2 + 2) return hash;
   return `${hash.slice(0, chars + 2)}...${hash.slice(-chars)}`;
@@ -62,7 +119,7 @@ export interface TransferInfo {
 export function parseTransferEvent(data: string): TransferInfo | null {
   // Transfer event data: [recipient_id (32 bytes = 64 hex chars)][amount (16 bytes = 32 hex chars)]
   if (data.length < 96) return null;
-  const to = data.slice(0, 64);
+  const toHex = data.slice(0, 64);
   const amountHex = data.slice(64, 96);
   // Amount is little-endian u128
   const bytes = [];
@@ -74,7 +131,7 @@ export function parseTransferEvent(data: string): TransferInfo | null {
   for (let i = bytes.length - 1; i >= 0; i--) {
     amount = (amount << BigInt(8)) | BigInt(bytes[i]);
   }
-  return { to, amount: amount.toString() };
+  return { to: hexToBase58(toHex), amount: amount.toString() };
 }
 
 export function getTransferInfo(events: { topic: string; data: string; emitter?: string }[], sender?: string): TransferInfo | null {
@@ -103,7 +160,7 @@ export interface RewardInfo {
 export function parseRewardEvent(data: string): RewardInfo | null {
   // Epoch reward data: [validator_id (32 bytes = 64 hex chars)][amount (16 bytes = 32 hex chars)]
   if (data.length < 96) return null;
-  const validator = data.slice(0, 64);
+  const validatorHex = data.slice(0, 64);
   const amountHex = data.slice(64, 96);
   const bytes = [];
   for (let i = 0; i < amountHex.length; i += 2) {
@@ -113,7 +170,7 @@ export function parseRewardEvent(data: string): RewardInfo | null {
   for (let i = bytes.length - 1; i >= 0; i--) {
     amount = (amount << BigInt(8)) | BigInt(bytes[i]);
   }
-  return { validator, amount: amount.toString() };
+  return { validator: hexToBase58(validatorHex), amount: amount.toString() };
 }
 
 export interface StakeInfo {
@@ -139,7 +196,7 @@ export function parseStakeEvent(data: string): StakeInfo | null {
     }
     return null;
   }
-  const validator = data.slice(0, 64);
+  const validatorHex = data.slice(0, 64);
   const amountHex = data.slice(64, 96);
   const bytes = [];
   for (let i = 0; i < amountHex.length; i += 2) {
@@ -149,7 +206,7 @@ export function parseStakeEvent(data: string): StakeInfo | null {
   for (let i = bytes.length - 1; i >= 0; i--) {
     amount = (amount << BigInt(8)) | BigInt(bytes[i]);
   }
-  return { validator, amount: amount.toString() };
+  return { validator: hexToBase58(validatorHex), amount: amount.toString() };
 }
 
 export interface SlashInfo {
@@ -160,7 +217,7 @@ export interface SlashInfo {
 export function parseSlashEvent(data: string): SlashInfo | null {
   // Slash event data: [offender (32 bytes = 64 hex chars)][penalty (16 bytes = 32 hex chars)]
   if (data.length < 96) return null;
-  const validator = data.slice(0, 64);
+  const validatorHex = data.slice(0, 64);
   const amountHex = data.slice(64, 96);
   const bytes = [];
   for (let i = 0; i < amountHex.length; i += 2) {
@@ -170,7 +227,7 @@ export function parseSlashEvent(data: string): SlashInfo | null {
   for (let i = bytes.length - 1; i >= 0; i--) {
     amount = (amount << BigInt(8)) | BigInt(bytes[i]);
   }
-  return { validator, amount: amount.toString() };
+  return { validator: hexToBase58(validatorHex), amount: amount.toString() };
 }
 
 export function isContractAccount(codeHash: string): boolean {

@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useNetwork } from "@/context/NetworkContext";
 import { createApi } from "@/lib/api";
 import { IndexedTx } from "@/lib/types";
-import { truncateHash, formatNumber, formatBalance, formatTokenBalance, getTransferInfo, parseTransferEvent, parseRewardEvent, parseStakeEvent, parseSlashEvent } from "@/lib/utils";
+import { truncateHash, formatNumber, formatBalance, formatTokenBalance, getTransferInfo, parseTransferEvent, parseRewardEvent, parseStakeEvent, parseSlashEvent, hexToBase58 } from "@/lib/utils";
 import { CopyButton } from "@/components/CopyButton";
 import { Loading, ErrorMessage } from "@/components/Loading";
 
@@ -190,7 +190,7 @@ export default function TxDetailPage() {
         {(() => {
           const transfer = getTransferInfo(tx.events, tx.sender);
           const tipEvent = tx.events.find((e) => e.topic === "solver_tip" && e.data.length >= 96);
-          const tipTo = tipEvent ? tipEvent.data.slice(0, 64) : null;
+          const tipTo = tipEvent ? hexToBase58(tipEvent.data.slice(0, 64)) : null;
           const tipAmount = tipEvent ? parseLeU128(tipEvent.data.slice(64, 96)) : null;
           const feeEvent = tx.events.find((e) => e.topic === "fee");
           const feeAmount = feeEvent ? parseLeU128(feeEvent.data.slice(0, 32)) : null;
@@ -269,7 +269,7 @@ export default function TxDetailPage() {
             let to: string | null = null;
             let amount: string;
             if (mintEvent.data.length >= 96) {
-              to = mintEvent.data.slice(0, 64);
+              to = hexToBase58(mintEvent.data.slice(0, 64));
               amount = parseLeU128(mintEvent.data.slice(64, 96));
             } else {
               amount = parseLeU128(mintEvent.data.slice(0, 32));
@@ -294,7 +294,7 @@ export default function TxDetailPage() {
           // Validator registered: validator[32] + amount[16]
           const regEvent = tx.events.find((e) => e.topic === "validator_registered" && e.data.length >= 96);
           if (regEvent) {
-            const validator = regEvent.data.slice(0, 64);
+            const validator = hexToBase58(regEvent.data.slice(0, 64));
             const amount = parseLeU128(regEvent.data.slice(64, 96));
             return (
               <>
@@ -314,7 +314,7 @@ export default function TxDetailPage() {
           // Delegate: validator[32] + amount[16]
           const delegateEvent = tx.events.find((e) => e.topic === "delegate" && e.data.length >= 96);
           if (delegateEvent) {
-            const validator = delegateEvent.data.slice(0, 64);
+            const validator = hexToBase58(delegateEvent.data.slice(0, 64));
             const amount = parseLeU128(delegateEvent.data.slice(64, 96));
             return (
               <Row label="Staked">
@@ -363,7 +363,7 @@ export default function TxDetailPage() {
               const isDelegate = event.topic === "delegate";
               const slashData = event.topic === "slashed" ? parseSlashEvent(event.data) : null;
               const isSolverTip = event.topic === "solver_tip" && event.data.length >= 96;
-              const solverTipTo = isSolverTip ? event.data.slice(0, 64) : null;
+              const solverTipTo = isSolverTip ? hexToBase58(event.data.slice(0, 64)) : null;
               const solverTipAmt = isSolverTip ? parseLeU128(event.data.slice(64, 96)) : null;
               const isIntentFulfilled = event.topic === "intent_fulfilled";
               return (
