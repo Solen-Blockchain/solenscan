@@ -50,18 +50,18 @@ export default function RollupDetailPage() {
     <div className="mx-auto max-w-6xl px-4 py-8">
       {/* Header */}
       <div className="mb-6">
-        <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
+        <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-2">
           <Link href="/rollups" className="hover:text-indigo-600">Rollups</Link>
           <span>/</span>
           <span>#{rollup.rollup_id}</span>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 font-bold">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 font-bold">
             #{rollup.rollup_id}
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">{rollup.name}</h1>
-            <p className="text-sm text-gray-500">Rollup Domain</p>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{rollup.name}</h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Rollup Domain</p>
           </div>
         </div>
       </div>
@@ -83,8 +83,8 @@ export default function RollupDetailPage() {
       </div>
 
       {/* Sequencer */}
-      <div className="rounded-xl border border-gray-200 bg-white p-5 mb-8">
-        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Sequencer</h2>
+      <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-900 p-5 mb-8">
+        <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Sequencer</h2>
         <Link
           href={`/account/${rollup.sequencer}`}
           className="font-mono text-sm text-indigo-600 hover:text-indigo-800 break-all"
@@ -94,20 +94,20 @@ export default function RollupDetailPage() {
       </div>
 
       {/* Batch history */}
-      <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
-        <div className="border-b border-gray-100 px-5 py-4">
-          <h2 className="text-lg font-semibold text-gray-900">Batch History</h2>
+      <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-900 overflow-hidden">
+        <div className="border-b border-gray-100 dark:border-gray-800 px-5 py-4">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Batch History</h2>
         </div>
 
         {batches.length === 0 ? (
-          <div className="px-5 py-8 text-center text-sm text-gray-500">
+          <div className="px-5 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
             No batches submitted yet
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-100 text-left text-xs uppercase tracking-wider text-gray-500">
+                <tr className="border-b border-gray-100 dark:border-gray-800 text-left text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">
                   <th className="px-5 py-3">Batch</th>
                   <th className="px-5 py-3">L1 Block</th>
                   <th className="px-5 py-3">State Root</th>
@@ -115,10 +115,10 @@ export default function RollupDetailPage() {
                   <th className="px-5 py-3">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
                 {batches.map((b) => (
-                  <tr key={b.batch_index} className="hover:bg-gray-50">
-                    <td className="px-5 py-3 font-medium text-gray-900">
+                  <tr key={b.batch_index} className="hover:bg-gray-50 dark:hover:bg-slate-800">
+                    <td className="px-5 py-3 font-medium text-gray-900 dark:text-gray-100">
                       #{formatNumber(b.batch_index)}
                     </td>
                     <td className="px-5 py-3">
@@ -127,22 +127,22 @@ export default function RollupDetailPage() {
                           #{formatNumber(b.block_height)}
                         </Link>
                       ) : (
-                        <span className="text-gray-400">-</span>
+                        <span className="text-gray-400 dark:text-gray-500">-</span>
                       )}
                     </td>
-                    <td className="px-5 py-3 font-mono text-xs text-gray-600">
+                    <td className="px-5 py-3 font-mono text-xs text-gray-600 dark:text-gray-400">
                       {truncateHash(b.state_root, 10)}
                     </td>
-                    <td className="px-5 py-3 font-mono text-xs text-gray-600">
+                    <td className="px-5 py-3 font-mono text-xs text-gray-600 dark:text-gray-400">
                       {truncateHash(b.data_hash, 10)}
                     </td>
                     <td className="px-5 py-3">
                       {b.verified ? (
-                        <span className="inline-flex items-center rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700 ring-1 ring-green-600/20">
+                        <span className="inline-flex items-center rounded-full bg-green-50 dark:bg-green-900/30 px-2 py-0.5 text-xs font-medium text-green-700 ring-1 ring-green-600/20 dark:ring-green-400/20">
                           Verified
                         </span>
                       ) : (
-                        <span className="inline-flex items-center rounded-full bg-yellow-50 px-2 py-0.5 text-xs font-medium text-yellow-700 ring-1 ring-yellow-600/20">
+                        <span className="inline-flex items-center rounded-full bg-yellow-50 dark:bg-yellow-900/30 px-2 py-0.5 text-xs font-medium text-yellow-700 ring-1 ring-yellow-600/20 dark:ring-yellow-400/20">
                           Pending
                         </span>
                       )}
@@ -160,9 +160,9 @@ export default function RollupDetailPage() {
 
 function InfoCard({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4">
-      <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">{label}</div>
-      <div className={`text-lg font-semibold text-gray-900 ${mono ? "font-mono text-sm" : ""}`}>
+    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-900 p-4">
+      <div className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">{label}</div>
+      <div className={`text-lg font-semibold text-gray-900 dark:text-gray-100 ${mono ? "font-mono text-sm" : ""}`}>
         {value}
       </div>
     </div>

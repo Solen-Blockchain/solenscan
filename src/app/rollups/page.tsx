@@ -28,8 +28,8 @@ export default function RollupsPage() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Rollups</h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Rollups</h1>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           Registered rollup domains on the Solen settlement layer
         </p>
       </div>
@@ -38,7 +38,7 @@ export default function RollupsPage() {
       {error && <ErrorMessage message={error} />}
 
       {!loading && !error && rollups.length === 0 && (
-        <div className="rounded-xl border border-gray-200 bg-white p-12 text-center text-gray-500">
+        <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-900 p-12 text-center text-gray-500 dark:text-gray-400">
           No rollups registered yet
         </div>
       )}
@@ -49,32 +49,32 @@ export default function RollupsPage() {
             <Link
               key={r.rollup_id}
               href={`/rollup/${r.rollup_id}`}
-              className="group rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition hover:border-indigo-300 hover:shadow-md"
+              className="group rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-900 p-5 shadow-sm transition hover:border-indigo-300 hover:shadow-md"
             >
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 text-sm font-bold">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 text-sm font-bold">
                     #{r.rollup_id}
                   </div>
-                  <h3 className="font-semibold text-gray-900 group-hover:text-indigo-600">
+                  <h3 className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-indigo-600">
                     {r.name || `Rollup #${r.rollup_id}`}
                   </h3>
                 </div>
                 {r.proof_type && (
-                  <span className="inline-flex items-center rounded-full bg-purple-50 px-2 py-0.5 text-xs font-medium text-purple-700 ring-1 ring-purple-600/20">
+                  <span className="inline-flex items-center rounded-full bg-purple-50 dark:bg-purple-900/30 px-2 py-0.5 text-xs font-medium text-purple-700 ring-1 ring-purple-600/20 dark:ring-purple-400/20">
                     {r.proof_type}
                   </span>
                 )}
               </div>
 
-              <div className="space-y-1.5 text-xs text-gray-500">
+              <div className="space-y-1.5 text-xs text-gray-500 dark:text-gray-400">
                 <div className="flex justify-between">
                   <span>Sequencer</span>
-                  <span className="font-mono text-gray-700">{truncateHash(r.sequencer)}</span>
+                  <span className="font-mono text-gray-700 dark:text-gray-300">{truncateHash(r.sequencer)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Registered</span>
-                  <span className="text-gray-700">Block #{formatNumber(r.registered_at_height)}</span>
+                  <span className="text-gray-700 dark:text-gray-300">Block #{formatNumber(r.registered_at_height)}</span>
                 </div>
               </div>
             </Link>

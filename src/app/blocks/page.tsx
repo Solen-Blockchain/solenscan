@@ -48,21 +48,21 @@ export default function BlocksPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8">
-      <h1 className="mb-6 text-2xl font-bold text-gray-900">Blocks</h1>
+      <h1 className="mb-6 text-2xl font-bold text-gray-900 dark:text-gray-100">Blocks</h1>
 
       {error && <ErrorMessage message={error} />}
 
-      <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
+      <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-900 shadow-sm">
         <div className="p-6">
           {loading && blocks.length === 0 ? (
             <Loading />
           ) : blocks.length > 0 ? (
             <BlocksTable blocks={blocks} />
           ) : (
-            <p className="py-8 text-center text-gray-400">No blocks found</p>
+            <p className="py-8 text-center text-gray-400 dark:text-gray-500">No blocks found</p>
           )}
         </div>
-        <div className="border-t border-gray-100 px-4">
+        <div className="border-t border-gray-100 dark:border-gray-800 px-4">
           <Pagination
             page={page}
             pageSize={PAGE_SIZE}

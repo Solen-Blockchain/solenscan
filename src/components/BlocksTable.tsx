@@ -12,11 +12,11 @@ interface BlocksTableProps {
 export function BlocksTable({ blocks, compact }: BlocksTableProps) {
   if (compact) {
     return (
-      <div className="divide-y divide-gray-100">
+      <div className="divide-y divide-gray-100 dark:divide-gray-800">
         {blocks.map((block) => (
-          <div key={block.height} className="flex items-center justify-between py-3 hover:bg-gray-50 px-1 transition-colors">
+          <div key={block.height} className="flex items-center justify-between py-3 hover:bg-gray-50 dark:hover:bg-slate-800 px-1 transition-colors">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100 text-gray-500 text-xs font-mono">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-gray-400 text-xs font-mono">
                 Bk
               </div>
               <div>
@@ -26,13 +26,13 @@ export function BlocksTable({ blocks, compact }: BlocksTableProps) {
                 >
                   #{formatNumber(block.height)}
                 </Link>
-                <p className="text-xs text-gray-400">{timeAgo(block.timestamp_ms)}</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500">{timeAgo(block.timestamp_ms)}</p>
               </div>
             </div>
             <div className="flex items-center gap-4">
               <div className="text-center hidden sm:block">
-                <p className="text-xs text-gray-600">{block.epoch}</p>
-                <p className="text-[10px] text-gray-400">epoch</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">{block.epoch}</p>
+                <p className="text-[10px] text-gray-400 dark:text-gray-500">epoch</p>
               </div>
               <div className="text-center">
                 <Link
@@ -41,15 +41,15 @@ export function BlocksTable({ blocks, compact }: BlocksTableProps) {
                 >
                   {truncateHash(block.proposer, 6)}
                 </Link>
-                <p className="text-[10px] text-gray-400">proposer</p>
+                <p className="text-[10px] text-gray-400 dark:text-gray-500">proposer</p>
               </div>
               <div className="text-center min-w-[32px]">
-                <p className="text-xs text-gray-600">{block.tx_count}</p>
-                <p className="text-[10px] text-gray-400">txns</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">{block.tx_count}</p>
+                <p className="text-[10px] text-gray-400 dark:text-gray-500">txns</p>
               </div>
               <div className="text-right min-w-[40px] hidden sm:block">
-                <p className="text-xs text-gray-600">{formatGas(block.gas_used)}</p>
-                <p className="text-[10px] text-gray-400">gas</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">{formatGas(block.gas_used)}</p>
+                <p className="text-[10px] text-gray-400 dark:text-gray-500">gas</p>
               </div>
             </div>
           </div>
@@ -62,7 +62,7 @@ export function BlocksTable({ blocks, compact }: BlocksTableProps) {
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-gray-200 text-left text-gray-500">
+          <tr className="border-b border-gray-200 dark:border-gray-700 text-left text-gray-500 dark:text-gray-400">
             <th className="pb-3 pr-4 font-medium">Block</th>
             <th className="pb-3 pr-4 font-medium">Epoch</th>
             <th className="pb-3 pr-4 font-medium">Age</th>
@@ -75,7 +75,7 @@ export function BlocksTable({ blocks, compact }: BlocksTableProps) {
           {blocks.map((block) => (
             <tr
               key={block.height}
-              className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+              className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
             >
               <td className="py-3 pr-4">
                 <Link
@@ -85,16 +85,16 @@ export function BlocksTable({ blocks, compact }: BlocksTableProps) {
                   {formatNumber(block.height)}
                 </Link>
               </td>
-              <td className="py-3 pr-4 text-gray-600">{block.epoch}</td>
-              <td className="py-3 pr-4 text-gray-600">
+              <td className="py-3 pr-4 text-gray-600 dark:text-gray-400">{block.epoch}</td>
+              <td className="py-3 pr-4 text-gray-600 dark:text-gray-400">
                 {timeAgo(block.timestamp_ms)}
               </td>
               <td className="py-3 pr-4">
-                <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
+                <span className="inline-flex items-center rounded-md bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 text-xs font-medium text-blue-700">
                   {block.tx_count}
                 </span>
               </td>
-              <td className="py-3 pr-4 text-gray-600">
+              <td className="py-3 pr-4 text-gray-600 dark:text-gray-400">
                 {formatGas(block.gas_used)}
               </td>
               <td className="py-3">

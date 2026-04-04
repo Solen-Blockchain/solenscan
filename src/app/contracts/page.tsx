@@ -65,26 +65,26 @@ export default function ContractsPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Deployed Contracts</h1>
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">Deployed Contracts</h1>
 
       {loading ? (
         <Loading />
       ) : contracts.length === 0 ? (
-        <p className="text-center text-gray-400 py-12">No contracts deployed yet</p>
+        <p className="text-center text-gray-400 dark:text-gray-500 py-12">No contracts deployed yet</p>
       ) : (
-        <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+        <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-900 shadow-sm overflow-hidden">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+            <thead className="bg-gray-50 dark:bg-slate-950">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Contract</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Total Supply</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Contract</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Type</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Name</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Total Supply</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
               {contracts.map((c) => (
-                <tr key={c.id} className="hover:bg-gray-50">
+                <tr key={c.id} className="hover:bg-gray-50 dark:hover:bg-slate-800">
                   <td className="px-6 py-4">
                     <Link
                       href={`/account/${c.id}`}
@@ -96,19 +96,19 @@ export default function ContractsPage() {
                   <td className="px-6 py-4">
                     <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
                       c.isSrc20
-                        ? "bg-purple-50 text-purple-700"
-                        : "bg-gray-100 text-gray-600"
+                        ? "bg-purple-50 dark:bg-purple-900/30 text-purple-700"
+                        : "bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-400"
                     }`}>
                       {c.isSrc20 ? "SRC-20" : "Contract"}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">
+                  <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
                     {c.name || "—"}
                     {c.symbol && (
-                      <span className="ml-1 text-gray-400">({c.symbol})</span>
+                      <span className="ml-1 text-gray-400 dark:text-gray-500">({c.symbol})</span>
                     )}
                   </td>
-                  <td className="px-6 py-4 text-sm text-right font-mono text-gray-900">
+                  <td className="px-6 py-4 text-sm text-right font-mono text-gray-900 dark:text-gray-100">
                     {c.totalSupply ? Number(c.totalSupply).toLocaleString() : "—"}
                   </td>
                 </tr>

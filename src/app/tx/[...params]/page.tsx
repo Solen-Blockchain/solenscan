@@ -145,25 +145,25 @@ export default function TxDetailPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8">
-      <h1 className="mb-6 text-2xl font-bold text-gray-900">
+      <h1 className="mb-6 text-2xl font-bold text-gray-900 dark:text-gray-100">
         Transaction Details
       </h1>
 
-      <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden mb-6">
+      <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-900 shadow-sm overflow-hidden mb-6">
         <Row label="Transaction ID" value={`${tx.block_height}-${tx.index}`} />
         <Row label="Status">
           {tx.events.some((e) => e.topic === "intent_fulfilled") ? (
-            <span className="inline-flex items-center rounded-full bg-cyan-50 px-2.5 py-1 text-sm font-medium text-cyan-700 ring-1 ring-cyan-600/20">
+            <span className="inline-flex items-center rounded-full bg-cyan-50 dark:bg-cyan-900/30 px-2.5 py-1 text-sm font-medium text-cyan-700 ring-1 ring-cyan-600/20 dark:ring-cyan-400/20">
               <span className="mr-1.5 h-2 w-2 rounded-full bg-cyan-500" />
               Intent Fulfilled
             </span>
           ) : tx.success ? (
-            <span className="inline-flex items-center rounded-full bg-green-50 px-2.5 py-1 text-sm font-medium text-green-700 ring-1 ring-green-600/20">
+            <span className="inline-flex items-center rounded-full bg-green-50 dark:bg-green-900/30 px-2.5 py-1 text-sm font-medium text-green-700 ring-1 ring-green-600/20 dark:ring-green-400/20">
               <span className="mr-1.5 h-2 w-2 rounded-full bg-green-500" />
               Success
             </span>
           ) : (
-            <span className="inline-flex items-center rounded-full bg-red-50 px-2.5 py-1 text-sm font-medium text-red-700 ring-1 ring-red-600/20">
+            <span className="inline-flex items-center rounded-full bg-red-50 dark:bg-red-900/30 px-2.5 py-1 text-sm font-medium text-red-700 ring-1 ring-red-600/20 dark:ring-red-400/20">
               <span className="mr-1.5 h-2 w-2 rounded-full bg-red-500" />
               Failed
             </span>
@@ -219,7 +219,7 @@ export default function TxDetailPage() {
                       <span className="text-lg font-semibold text-purple-700">
                         <TokenAmount amount={transfer.amount} contractId={transfer.tokenContract} />
                       </span>
-                      <span className="ml-2 text-sm text-gray-500">
+                      <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">
                         via contract{" "}
                         <Link href={`/account/${transfer.tokenContract}`} className="text-indigo-600 hover:text-indigo-800 font-mono">
                           {truncateHash(transfer.tokenContract, 8)}
@@ -228,10 +228,10 @@ export default function TxDetailPage() {
                     </>
                   ) : (
                     <>
-                      <span className="text-lg font-semibold text-gray-900">
+                      <span className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                         {formatBalance(transfer.amount)} SOLEN
                       </span>
-                      <span className="ml-2 text-xs text-gray-400">(raw: {transfer.amount})</span>
+                      <span className="ml-2 text-xs text-gray-400 dark:text-gray-500">(raw: {transfer.amount})</span>
                     </>
                   )}
                 </Row>
@@ -240,7 +240,7 @@ export default function TxDetailPage() {
                     <span className="text-sm font-semibold text-cyan-700">
                       {formatBalance(tipAmount)} SOLEN
                     </span>
-                    <span className="ml-2 text-sm text-gray-500">
+                    <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">
                       to{" "}
                       <Link href={`/account/${tipTo}`} className="text-indigo-600 hover:text-indigo-800 font-mono">
                         {truncateHash(tipTo, 8)}
@@ -250,10 +250,10 @@ export default function TxDetailPage() {
                 )}
                 {(tipBig > BigInt(0) || feeBig > BigInt(0)) && !transfer.tokenContract && (
                   <Row label="Total Cost">
-                    <span className="text-sm font-semibold text-gray-900">
+                    <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                       {formatBalance(totalCost.toString())} SOLEN
                     </span>
-                    <span className="ml-2 text-xs text-gray-400">
+                    <span className="ml-2 text-xs text-gray-400 dark:text-gray-500">
                       ({formatBalance(transfer.amount)} transfer
                       {tipBig > BigInt(0) ? ` + ${formatBalance(tipAmount!)} tip` : ""}
                       {feeBig > BigInt(0) ? ` + ${formatBalance(feeAmount!)} fee` : ""})
@@ -321,7 +321,7 @@ export default function TxDetailPage() {
                 <span className="text-lg font-semibold text-blue-700">
                   {formatBalance(amount)} SOLEN
                 </span>
-                <span className="ml-2 text-sm text-gray-500">
+                <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">
                   to{" "}
                   <Link href={`/account/${validator}`} className="text-indigo-600 hover:text-indigo-800 font-mono">
                     {truncateHash(validator, 8)}
@@ -334,8 +334,8 @@ export default function TxDetailPage() {
         })()}
         <Row label="Nonce" value={formatNumber(tx.nonce)} />
         <Row label="Gas Used">
-          <span className="font-semibold text-gray-900">{formatBalance(tx.gas_used.toString())} SOLEN</span>
-          <span className="ml-2 text-xs text-gray-400">(raw: {formatNumber(tx.gas_used)})</span>
+          <span className="font-semibold text-gray-900 dark:text-gray-100">{formatBalance(tx.gas_used.toString())} SOLEN</span>
+          <span className="ml-2 text-xs text-gray-400 dark:text-gray-500">(raw: {formatNumber(tx.gas_used)})</span>
         </Row>
         {tx.error && (
           <Row label="Error">
@@ -346,13 +346,13 @@ export default function TxDetailPage() {
 
       {/* Events */}
       {tx.events.length > 0 && (
-        <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
-            <h2 className="font-semibold text-gray-900">
+        <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-900 shadow-sm overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-slate-800/50">
+            <h2 className="font-semibold text-gray-900 dark:text-gray-100">
               Events ({tx.events.length})
             </h2>
           </div>
-          <div className="divide-y divide-gray-100">
+          <div className="divide-y divide-gray-100 dark:divide-gray-800">
             {tx.events.map((event, i) => {
               const transferRaw = event.topic === "transfer" ? parseTransferEvent(event.data) : null;
               const isTokenTransfer = transferRaw && event.emitter !== tx.sender;
@@ -373,19 +373,19 @@ export default function TxDetailPage() {
                     <div className="flex items-center gap-2 mb-2">
                       <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ${
                         event.topic === "slashed"
-                          ? "bg-red-50 text-red-700"
+                          ? "bg-red-50 dark:bg-red-900/30 text-red-700"
                           : event.topic === "epoch_reward" || event.topic === "delegator_reward"
-                            ? "bg-amber-50 text-amber-700"
+                            ? "bg-amber-50 dark:bg-amber-900/30 text-amber-700"
                             : event.topic === "solver_tip" || event.topic === "intent_fulfilled"
-                              ? "bg-cyan-50 text-cyan-700"
-                              : "bg-purple-50 text-purple-700"
+                              ? "bg-cyan-50 dark:bg-cyan-900/30 text-cyan-700"
+                              : "bg-purple-50 dark:bg-purple-900/30 text-purple-700"
                       }`}>
                         {event.topic}
                       </span>
-                      <span className="text-xs text-gray-400">Event #{i}</span>
+                      <span className="text-xs text-gray-400 dark:text-gray-500">Event #{i}</span>
                     </div>
                     <div className="flex items-center gap-1 mb-1">
-                      <span className="text-xs text-gray-500">Emitter:</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">Emitter:</span>
                       <Link
                         href={`/account/${event.emitter}`}
                         className="text-xs text-indigo-600 hover:text-indigo-800 font-mono"
@@ -395,9 +395,9 @@ export default function TxDetailPage() {
                       <CopyButton text={event.emitter} />
                     </div>
                     {transfer && (
-                      <div className="mt-2 rounded-lg bg-gray-50 p-3 space-y-1.5">
+                      <div className="mt-2 rounded-lg bg-gray-50 dark:bg-slate-950 p-3 space-y-1.5">
                         <div className="flex items-center gap-1">
-                          <span className="text-xs text-gray-500 w-16">To:</span>
+                          <span className="text-xs text-gray-500 dark:text-gray-400 w-16">To:</span>
                           <Link
                             href={`/account/${transfer.to}`}
                             className="text-xs text-indigo-600 hover:text-indigo-800 font-mono"
@@ -407,25 +407,25 @@ export default function TxDetailPage() {
                           <CopyButton text={transfer.to} />
                         </div>
                         <div className="flex items-center gap-1">
-                          <span className="text-xs text-gray-500 w-16">Amount:</span>
+                          <span className="text-xs text-gray-500 dark:text-gray-400 w-16">Amount:</span>
                           {transfer.tokenContract ? (
                             <>
                               <span className="text-sm font-medium text-purple-700">{formatNumber(Number(transfer.amount))} <TokenSymbol contractId={transfer.tokenContract} /></span>
-                              <span className="text-xs text-gray-400 ml-1">(contract: {truncateHash(transfer.tokenContract, 6)})</span>
+                              <span className="text-xs text-gray-400 dark:text-gray-500 ml-1">(contract: {truncateHash(transfer.tokenContract, 6)})</span>
                             </>
                           ) : (
                             <>
-                              <span className="text-sm font-medium text-gray-900">{formatBalance(transfer.amount)} SOLEN</span>
-                              <span className="text-xs text-gray-400 ml-1">(raw: {transfer.amount})</span>
+                              <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{formatBalance(transfer.amount)} SOLEN</span>
+                              <span className="text-xs text-gray-400 dark:text-gray-500 ml-1">(raw: {transfer.amount})</span>
                             </>
                           )}
                         </div>
                       </div>
                     )}
                     {reward && (
-                      <div className={`mt-2 rounded-lg p-3 space-y-1.5 ${isDelegatorReward ? "bg-emerald-50" : "bg-amber-50"}`}>
+                      <div className={`mt-2 rounded-lg p-3 space-y-1.5 ${isDelegatorReward ? "bg-emerald-50 dark:bg-emerald-900/30" : "bg-amber-50 dark:bg-amber-900/30"}`}>
                         <div className="flex items-center gap-1">
-                          <span className="text-xs text-gray-500 w-16">{isDelegatorReward ? "Delegator:" : "Validator:"}</span>
+                          <span className="text-xs text-gray-500 dark:text-gray-400 w-16">{isDelegatorReward ? "Delegator:" : "Validator:"}</span>
                           <Link
                             href={`/account/${reward.validator}`}
                             className="text-xs text-indigo-600 hover:text-indigo-800 font-mono"
@@ -435,17 +435,17 @@ export default function TxDetailPage() {
                           <CopyButton text={reward.validator} />
                         </div>
                         <div className="flex items-center gap-1">
-                          <span className="text-xs text-gray-500 w-16">Reward:</span>
+                          <span className="text-xs text-gray-500 dark:text-gray-400 w-16">Reward:</span>
                           <span className={`text-sm font-medium ${isDelegatorReward ? "text-emerald-700" : "text-amber-700"}`}>{formatBalance(reward.amount)} SOLEN</span>
-                          <span className="text-xs text-gray-400 ml-1">(raw: {reward.amount})</span>
+                          <span className="text-xs text-gray-400 dark:text-gray-500 ml-1">(raw: {reward.amount})</span>
                         </div>
                       </div>
                     )}
                     {stake && (
-                      <div className={`mt-2 rounded-lg p-3 space-y-1.5 ${isDelegate ? "bg-blue-50" : "bg-orange-50"}`}>
+                      <div className={`mt-2 rounded-lg p-3 space-y-1.5 ${isDelegate ? "bg-blue-50 dark:bg-blue-900/30" : "bg-orange-50 dark:bg-orange-900/30"}`}>
                         {stake.validator && (
                           <div className="flex items-center gap-1">
-                            <span className="text-xs text-gray-500 w-16">Validator:</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400 w-16">Validator:</span>
                             <Link
                               href={`/account/${stake.validator}`}
                               className="text-xs text-indigo-600 hover:text-indigo-800 font-mono"
@@ -456,18 +456,18 @@ export default function TxDetailPage() {
                           </div>
                         )}
                         <div className="flex items-center gap-1">
-                          <span className="text-xs text-gray-500 w-16">Amount:</span>
+                          <span className="text-xs text-gray-500 dark:text-gray-400 w-16">Amount:</span>
                           <span className={`text-sm font-medium ${isDelegate ? "text-blue-700" : "text-orange-700"}`}>
                             {isDelegate ? "+" : "-"}{formatBalance(stake.amount)} SOLEN
                           </span>
-                          <span className="text-xs text-gray-400 ml-1">(raw: {stake.amount})</span>
+                          <span className="text-xs text-gray-400 dark:text-gray-500 ml-1">(raw: {stake.amount})</span>
                         </div>
                       </div>
                     )}
                     {slashData && (
-                      <div className="mt-2 rounded-lg bg-red-50 p-3 space-y-1.5">
+                      <div className="mt-2 rounded-lg bg-red-50 dark:bg-red-900/30 p-3 space-y-1.5">
                         <div className="flex items-center gap-1">
-                          <span className="text-xs text-gray-500 w-16">Validator:</span>
+                          <span className="text-xs text-gray-500 dark:text-gray-400 w-16">Validator:</span>
                           <Link
                             href={`/account/${slashData.validator}`}
                             className="text-xs text-indigo-600 hover:text-indigo-800 font-mono"
@@ -477,16 +477,16 @@ export default function TxDetailPage() {
                           <CopyButton text={slashData.validator} />
                         </div>
                         <div className="flex items-center gap-1">
-                          <span className="text-xs text-gray-500 w-16">Penalty:</span>
+                          <span className="text-xs text-gray-500 dark:text-gray-400 w-16">Penalty:</span>
                           <span className="text-sm font-medium text-red-700">-{formatBalance(slashData.amount)} SOLEN</span>
-                          <span className="text-xs text-gray-400 ml-1">(raw: {slashData.amount})</span>
+                          <span className="text-xs text-gray-400 dark:text-gray-500 ml-1">(raw: {slashData.amount})</span>
                         </div>
                       </div>
                     )}
                     {isSolverTip && solverTipTo && solverTipAmt && (
-                      <div className="mt-2 rounded-lg bg-cyan-50 p-3 space-y-1.5">
+                      <div className="mt-2 rounded-lg bg-cyan-50 dark:bg-cyan-900/30 p-3 space-y-1.5">
                         <div className="flex items-center gap-1">
-                          <span className="text-xs text-gray-500 w-16">Solver:</span>
+                          <span className="text-xs text-gray-500 dark:text-gray-400 w-16">Solver:</span>
                           <Link
                             href={`/account/${solverTipTo}`}
                             className="text-xs text-indigo-600 hover:text-indigo-800 font-mono"
@@ -496,16 +496,16 @@ export default function TxDetailPage() {
                           <CopyButton text={solverTipTo} />
                         </div>
                         <div className="flex items-center gap-1">
-                          <span className="text-xs text-gray-500 w-16">Tip:</span>
+                          <span className="text-xs text-gray-500 dark:text-gray-400 w-16">Tip:</span>
                           <span className="text-sm font-medium text-cyan-700">{formatBalance(solverTipAmt)} SOLEN</span>
-                          <span className="text-xs text-gray-400 ml-1">(raw: {solverTipAmt})</span>
+                          <span className="text-xs text-gray-400 dark:text-gray-500 ml-1">(raw: {solverTipAmt})</span>
                         </div>
                       </div>
                     )}
                     {isIntentFulfilled && (
-                      <div className="mt-2 rounded-lg bg-cyan-50 p-3">
+                      <div className="mt-2 rounded-lg bg-cyan-50 dark:bg-cyan-900/30 p-3">
                         <div className="flex items-center gap-1">
-                          <span className="text-xs text-gray-500 w-16">Intent ID:</span>
+                          <span className="text-xs text-gray-500 dark:text-gray-400 w-16">Intent ID:</span>
                           <span className="text-sm font-medium text-cyan-700">
                             #{event.data.length >= 16 ? parseInt(parseLeU128(event.data.slice(0, 16))) : event.data}
                           </span>
@@ -513,15 +513,15 @@ export default function TxDetailPage() {
                       </div>
                     )}
                     {!transfer && !reward && !stake && !slashData && !isSolverTip && !isIntentFulfilled && event.data && event.data !== "" && event.data !== "00" && (
-                      <div className="mt-2 rounded-lg bg-gray-50 p-3">
-                        <span className="text-xs text-gray-500">Data:</span>
-                        <p className="text-xs font-mono text-gray-700 mt-0.5 break-all">{event.data}</p>
+                      <div className="mt-2 rounded-lg bg-gray-50 dark:bg-slate-950 p-3">
+                        <span className="text-xs text-gray-500 dark:text-gray-400">Data:</span>
+                        <p className="text-xs font-mono text-gray-700 dark:text-gray-300 mt-0.5 break-all">{event.data}</p>
                       </div>
                     )}
                   </div>
                   <Link
                     href={`/block/${event.block_height}`}
-                    className="text-xs text-gray-400 shrink-0"
+                    className="text-xs text-gray-400 dark:text-gray-500 shrink-0"
                   >
                     Block #{formatNumber(event.block_height)}
                   </Link>
@@ -546,11 +546,11 @@ function Row({
   children?: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col sm:flex-row border-b border-gray-100 last:border-0">
-      <div className="px-6 py-3.5 text-sm font-medium text-gray-500 sm:w-48 bg-gray-50/50">
+    <div className="flex flex-col sm:flex-row border-b border-gray-100 dark:border-gray-800 last:border-0">
+      <div className="px-6 py-3.5 text-sm font-medium text-gray-500 dark:text-gray-400 sm:w-48 bg-gray-50/50 dark:bg-slate-800/50">
         {label}
       </div>
-      <div className="px-6 py-3.5 text-sm text-gray-900 flex-1 flex items-center gap-1">
+      <div className="px-6 py-3.5 text-sm text-gray-900 dark:text-gray-100 flex-1 flex items-center gap-1">
         {value || children}
       </div>
     </div>

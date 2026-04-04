@@ -89,21 +89,21 @@ export default function HomePage() {
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 py-6">
       {/* Hero search section */}
-      <div className="mb-6 rounded-2xl bg-white border border-gray-200 shadow-sm p-6 sm:p-8">
+      <div className="mb-6 rounded-2xl bg-white dark:bg-slate-900 border border-gray-200 dark:border-gray-700 shadow-sm p-6 sm:p-8">
         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
           <div className="flex-1">
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">
               Solen Blockchain Explorer
             </h1>
-            <p className="text-gray-500 text-sm mb-4">
+            <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">
               Search blocks, transactions, accounts, and events on{" "}
-              <span className="font-medium text-gray-900">{network.name}</span>
+              <span className="font-medium text-gray-900 dark:text-gray-100">{network.name}</span>
             </p>
             <div className="relative max-w-xl">
               <input
                 type="text"
                 placeholder="Search by block height, account ID, or transaction..."
-                className="w-full rounded-xl bg-gray-50 border border-gray-200 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-300"
+                className="w-full rounded-xl bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-gray-700 px-4 py-3 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-300"
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     const q = (e.target as HTMLInputElement).value.trim();
@@ -112,7 +112,7 @@ export default function HomePage() {
                   }
                 }}
               />
-              <svg className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </div>
@@ -121,21 +121,21 @@ export default function HomePage() {
           {chainStatus && chainStatus.total_allocation !== "0" && (
             <div className="flex flex-row lg:flex-col gap-3 lg:gap-2 lg:text-right">
               <div>
-                <div className="text-gray-400 text-[10px] uppercase tracking-wide">Total Allocation</div>
-                <div className="text-sm font-semibold text-gray-900">
-                  {formatBalance(chainStatus.total_allocation)} <span className="text-xs font-normal text-gray-400">SOLEN</span>
+                <div className="text-gray-400 dark:text-gray-500 text-[10px] uppercase tracking-wide">Total Allocation</div>
+                <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                  {formatBalance(chainStatus.total_allocation)} <span className="text-xs font-normal text-gray-400 dark:text-gray-500">SOLEN</span>
                 </div>
               </div>
               <div>
-                <div className="text-gray-400 text-[10px] uppercase tracking-wide">Total Staked</div>
-                <div className="text-sm font-semibold text-gray-900">
-                  {formatBalance(chainStatus.total_staked)} <span className="text-xs font-normal text-gray-400">SOLEN</span>
+                <div className="text-gray-400 dark:text-gray-500 text-[10px] uppercase tracking-wide">Total Staked</div>
+                <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                  {formatBalance(chainStatus.total_staked)} <span className="text-xs font-normal text-gray-400 dark:text-gray-500">SOLEN</span>
                 </div>
               </div>
               <div>
-                <div className="text-gray-400 text-[10px] uppercase tracking-wide">Circulating Supply</div>
-                <div className="text-sm font-semibold text-gray-900">
-                  {formatBalance(chainStatus.total_circulation)} <span className="text-xs font-normal text-gray-400">SOLEN</span>
+                <div className="text-gray-400 dark:text-gray-500 text-[10px] uppercase tracking-wide">Circulating Supply</div>
+                <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                  {formatBalance(chainStatus.total_circulation)} <span className="text-xs font-normal text-gray-400 dark:text-gray-500">SOLEN</span>
                 </div>
               </div>
             </div>
@@ -185,12 +185,12 @@ export default function HomePage() {
 
       {/* Latest blocks & events side by side */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-        <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-            <h2 className="font-semibold text-gray-900">Latest Blocks</h2>
+        <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-900 shadow-sm">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800">
+            <h2 className="font-semibold text-gray-900 dark:text-gray-100">Latest Blocks</h2>
             <Link
               href="/blocks"
-              className="text-xs text-indigo-600 hover:text-indigo-800 font-medium px-3 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 transition-colors"
+              className="text-xs text-indigo-600 hover:text-indigo-800 font-medium px-3 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 transition-colors"
             >
               View All
             </Link>
@@ -201,17 +201,17 @@ export default function HomePage() {
             ) : blocks && blocks.length > 0 ? (
               <BlocksTable blocks={blocks.slice(0, 8)} compact />
             ) : (
-              <p className="py-8 text-center text-gray-400">No blocks yet</p>
+              <p className="py-8 text-center text-gray-400 dark:text-gray-500">No blocks yet</p>
             )}
           </div>
         </div>
 
-        <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-            <h2 className="font-semibold text-gray-900">Latest Transactions</h2>
+        <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-900 shadow-sm">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800">
+            <h2 className="font-semibold text-gray-900 dark:text-gray-100">Latest Transactions</h2>
             <Link
               href="/txs"
-              className="text-xs text-indigo-600 hover:text-indigo-800 font-medium px-3 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 transition-colors"
+              className="text-xs text-indigo-600 hover:text-indigo-800 font-medium px-3 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 transition-colors"
             >
               View All
             </Link>
@@ -220,7 +220,7 @@ export default function HomePage() {
             {txs && txs.length > 0 ? (
               <TransactionsTable transactions={txs.slice(0, 8)} compact />
             ) : (
-              <p className="py-8 text-center text-gray-400">No transactions yet</p>
+              <p className="py-8 text-center text-gray-400 dark:text-gray-500">No transactions yet</p>
             )}
           </div>
         </div>
@@ -228,48 +228,48 @@ export default function HomePage() {
 
       {/* Chain overview card */}
       {chainStatus && (
-        <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-          <h2 className="font-semibold text-gray-900 mb-3">Chain Overview</h2>
+        <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-900 p-5 shadow-sm">
+          <h2 className="font-semibold text-gray-900 dark:text-gray-100 mb-3">Chain Overview</h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4 text-sm">
             <div>
-              <span className="text-gray-500 text-xs">Chain ID</span>
-              <p className="font-semibold text-gray-900 mt-1">
+              <span className="text-gray-500 dark:text-gray-400 text-xs">Chain ID</span>
+              <p className="font-semibold text-gray-900 dark:text-gray-100 mt-1">
                 {network.id === "testnet" ? "9000" : network.id === "mainnet" ? "1" : "1337"}
               </p>
             </div>
             <div>
-              <span className="text-gray-500 text-xs">Finalized Height</span>
-              <p className="font-semibold text-gray-900 mt-1">
+              <span className="text-gray-500 dark:text-gray-400 text-xs">Finalized Height</span>
+              <p className="font-semibold text-gray-900 dark:text-gray-100 mt-1">
                 {formatNumber(chainStatus.height)}
               </p>
             </div>
             <div>
-              <span className="text-gray-500 text-xs">Block Time</span>
-              <p className="font-semibold text-gray-900 mt-1">
+              <span className="text-gray-500 dark:text-gray-400 text-xs">Block Time</span>
+              <p className="font-semibold text-gray-900 dark:text-gray-100 mt-1">
                 {blockTime ? `${blockTime}s` : "—"}
               </p>
             </div>
             <div>
-              <span className="text-gray-500 text-xs">Validators</span>
-              <p className="font-semibold text-gray-900 mt-1">
+              <span className="text-gray-500 dark:text-gray-400 text-xs">Validators</span>
+              <p className="font-semibold text-gray-900 dark:text-gray-100 mt-1">
                 {validators ? validators.active_count : "—"}
               </p>
             </div>
             <div>
-              <span className="text-gray-500 text-xs">Mempool</span>
-              <p className="font-semibold text-gray-900 mt-1">
+              <span className="text-gray-500 dark:text-gray-400 text-xs">Mempool</span>
+              <p className="font-semibold text-gray-900 dark:text-gray-100 mt-1">
                 {formatNumber(chainStatus.pending_ops)}
               </p>
             </div>
             <div>
-              <span className="text-gray-500 text-xs">Genesis</span>
-              <p className="text-gray-900 mt-1 text-xs">
+              <span className="text-gray-500 dark:text-gray-400 text-xs">Genesis</span>
+              <p className="text-gray-900 dark:text-gray-100 mt-1 text-xs">
                 {genesisTime ? new Date(genesisTime).toLocaleDateString() : "—"}
               </p>
             </div>
             <div>
-              <span className="text-gray-500 text-xs">Uptime</span>
-              <p className="font-semibold text-gray-900 mt-1">
+              <span className="text-gray-500 dark:text-gray-400 text-xs">Uptime</span>
+              <p className="font-semibold text-gray-900 dark:text-gray-100 mt-1">
                 {genesisTime ? formatUptime(Date.now() - genesisTime) : "—"}
               </p>
             </div>

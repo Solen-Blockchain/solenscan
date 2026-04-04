@@ -25,31 +25,31 @@ function statusBadge(status: string) {
   switch (status) {
     case "Active":
       return (
-        <span className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700 ring-1 ring-blue-600/20">
+        <span className="inline-flex items-center rounded-full bg-blue-50 dark:bg-blue-900/30 px-2.5 py-0.5 text-xs font-medium text-blue-700 ring-1 ring-blue-600/20 dark:ring-blue-400/20">
           <span className="mr-1 h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse" />
           Voting
         </span>
       );
     case "Passed":
       return (
-        <span className="inline-flex items-center rounded-full bg-green-50 px-2.5 py-0.5 text-xs font-medium text-green-700 ring-1 ring-green-600/20">
+        <span className="inline-flex items-center rounded-full bg-green-50 dark:bg-green-900/30 px-2.5 py-0.5 text-xs font-medium text-green-700 ring-1 ring-green-600/20 dark:ring-green-400/20">
           Passed
         </span>
       );
     case "Rejected":
       return (
-        <span className="inline-flex items-center rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-medium text-red-700 ring-1 ring-red-600/20">
+        <span className="inline-flex items-center rounded-full bg-red-50 dark:bg-red-900/30 px-2.5 py-0.5 text-xs font-medium text-red-700 ring-1 ring-red-600/20 dark:ring-red-400/20">
           Rejected
         </span>
       );
     case "Executed":
       return (
-        <span className="inline-flex items-center rounded-full bg-purple-50 px-2.5 py-0.5 text-xs font-medium text-purple-700 ring-1 ring-purple-600/20">
+        <span className="inline-flex items-center rounded-full bg-purple-50 dark:bg-purple-900/30 px-2.5 py-0.5 text-xs font-medium text-purple-700 ring-1 ring-purple-600/20 dark:ring-purple-400/20">
           Executed
         </span>
       );
     default:
-      return <span className="text-gray-500 text-xs">{status}</span>;
+      return <span className="text-gray-500 dark:text-gray-400 text-xs">{status}</span>;
   }
 }
 
@@ -106,9 +106,9 @@ export default function GovernancePage() {
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Governance</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Governance</h1>
         {chainStatus && (
-          <span className="text-sm text-gray-500">Current Epoch: {currentEpoch}</span>
+          <span className="text-sm text-gray-500 dark:text-gray-400">Current Epoch: {currentEpoch}</span>
         )}
       </div>
 
@@ -117,10 +117,10 @@ export default function GovernancePage() {
       {loading ? (
         <Loading />
       ) : proposals.length === 0 ? (
-        <div className="rounded-xl border border-gray-200 bg-white p-12 text-center shadow-sm">
-          <p className="text-gray-400 mb-2">No proposals yet</p>
-          <p className="text-xs text-gray-400">
-            Create a proposal via CLI: <code className="bg-gray-100 px-1 rounded">solen propose-block-time</code>
+        <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-900 p-12 text-center shadow-sm">
+          <p className="text-gray-400 dark:text-gray-500 mb-2">No proposals yet</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500">
+            Create a proposal via CLI: <code className="bg-gray-100 dark:bg-slate-800 px-1 rounded">solen propose-block-time</code>
           </p>
         </div>
       ) : (
@@ -138,19 +138,19 @@ export default function GovernancePage() {
             return (
               <div
                 key={p.id}
-                className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm"
+                className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-900 p-6 shadow-sm"
               >
                 <div className="flex items-start justify-between mb-3">
                   <div>
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-lg font-semibold text-gray-900">
+                      <span className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                         Proposal #{p.id}
                       </span>
                       {statusBadge(p.status)}
                     </div>
-                    <p className="text-sm text-gray-600">{p.description}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">{p.description}</p>
                   </div>
-                  <div className="text-right text-xs text-gray-400">
+                  <div className="text-right text-xs text-gray-400 dark:text-gray-500">
                     <div>Proposed by{" "}
                       <Link href={`/account/${p.proposer}`} className="text-indigo-600 hover:text-indigo-800 font-mono">
                         {truncateHash(p.proposer, 6)}
@@ -160,14 +160,14 @@ export default function GovernancePage() {
                 </div>
 
                 {/* Action */}
-                <div className="mb-4 rounded-lg bg-gray-50 border border-gray-200 p-3">
-                  <span className="text-xs text-gray-500">Action:</span>
-                  <p className="text-sm font-medium text-gray-900">{parseAction(p.action)}</p>
+                <div className="mb-4 rounded-lg bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-gray-700 p-3">
+                  <span className="text-xs text-gray-500 dark:text-gray-400">Action:</span>
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{parseAction(p.action)}</p>
                 </div>
 
                 {/* Votes */}
                 <div className="mb-4">
-                  <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
+                  <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
                     <span>{p.vote_count} vote{p.vote_count !== 1 ? "s" : ""}</span>
                     <span>
                       For: {formatNumber(Number(BigInt(p.total_for) / BigInt(100000000)))} SOLEN
@@ -175,7 +175,7 @@ export default function GovernancePage() {
                       Against: {formatNumber(Number(BigInt(p.total_against) / BigInt(100000000)))} SOLEN
                     </span>
                   </div>
-                  <div className="w-full bg-gray-100 rounded-full h-3 flex overflow-hidden">
+                  <div className="w-full bg-gray-100 dark:bg-slate-800 rounded-full h-3 flex overflow-hidden">
                     {totalVotes > BigInt(0) && (
                       <>
                         <div
@@ -196,7 +196,7 @@ export default function GovernancePage() {
                 </div>
 
                 {/* Timeline */}
-                <div className="flex items-center gap-4 text-xs text-gray-500">
+                <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                   {isVoting && !canFinalize && (
                     <span className="text-blue-600">
                       {epochsLeft} epoch{epochsLeft !== 1 ? "s" : ""} remaining

@@ -98,7 +98,7 @@ interface TransactionsTableProps {
 export function TransactionsTable({ transactions, compact, accountFilter }: TransactionsTableProps) {
   if (compact) {
     return (
-      <div className="divide-y divide-gray-100">
+      <div className="divide-y divide-gray-100 dark:divide-gray-800">
         {transactions.map((tx) => {
           const transfer = getTransferInfo(tx.events, tx.sender);
 
@@ -145,19 +145,19 @@ export function TransactionsTable({ transactions, compact, accountFilter }: Tran
           return (
             <div
               key={`${tx.block_height}-${tx.index}`}
-              className="flex items-center justify-between py-3 hover:bg-gray-50 px-1 transition-colors"
+              className="flex items-center justify-between py-3 hover:bg-gray-50 dark:hover:bg-slate-800 px-1 transition-colors"
             >
               <div className="flex items-center gap-3">
                 <div className={`flex h-10 w-10 items-center justify-center rounded-lg text-xs font-mono ${
                   isSlash
-                    ? "bg-red-50 text-red-600"
+                    ? "bg-red-50 dark:bg-red-900/30 text-red-600"
                     : isIntent
-                      ? "bg-cyan-50 text-cyan-600"
+                      ? "bg-cyan-50 dark:bg-cyan-900/30 text-cyan-600"
                       : isReward
-                        ? "bg-amber-50 text-amber-600"
+                        ? "bg-amber-50 dark:bg-amber-900/30 text-amber-600"
                         : (transfer?.tokenContract || mintAmount)
-                          ? "bg-purple-50 text-purple-600"
-                          : tx.success ? "bg-green-50 text-green-600" : "bg-red-50 text-red-600"
+                          ? "bg-purple-50 dark:bg-purple-900/30 text-purple-600"
+                          : tx.success ? "bg-green-50 dark:bg-green-900/30 text-green-600" : "bg-red-50 dark:bg-red-900/30 text-red-600"
                 }`}>
                   {isSlash ? "⚠" : isIntent ? "⚡" : isReward ? "⛏" : (transfer?.tokenContract || mintAmount) ? "TK" : "Tx"}
                 </div>
@@ -170,22 +170,22 @@ export function TransactionsTable({ transactions, compact, accountFilter }: Tran
                       #{formatNumber(tx.block_height)}-{tx.index}
                     </Link>
                     {isSlash && (
-                      <span className="inline-flex items-center rounded-md bg-red-50 px-1.5 py-0.5 text-xs font-medium text-red-700">
+                      <span className="inline-flex items-center rounded-md bg-red-50 dark:bg-red-900/30 px-1.5 py-0.5 text-xs font-medium text-red-700">
                         Slash
                       </span>
                     )}
                     {isIntent && (
-                      <span className="inline-flex items-center rounded-md bg-cyan-50 px-1.5 py-0.5 text-xs font-medium text-cyan-700">
+                      <span className="inline-flex items-center rounded-md bg-cyan-50 dark:bg-cyan-900/30 px-1.5 py-0.5 text-xs font-medium text-cyan-700">
                         Intent
                       </span>
                     )}
                     {isReward && (
-                      <span className="inline-flex items-center rounded-md bg-amber-50 px-1.5 py-0.5 text-xs font-medium text-amber-700">
+                      <span className="inline-flex items-center rounded-md bg-amber-50 dark:bg-amber-900/30 px-1.5 py-0.5 text-xs font-medium text-amber-700">
                         Reward
                       </span>
                     )}
                   </div>
-                  <div className="flex items-center gap-1 text-xs text-gray-400">
+                  <div className="flex items-center gap-1 text-xs text-gray-400 dark:text-gray-500">
                     {isSlash && slash ? (
                       <>
                         <span className="text-red-600">Slashed</span>
@@ -232,7 +232,7 @@ export function TransactionsTable({ transactions, compact, accountFilter }: Tran
                   </p>
                 )}
                 {transfer && (
-                  <p className={`text-sm font-medium ${transfer.tokenContract ? "text-purple-700" : "text-gray-900"}`}>
+                  <p className={`text-sm font-medium ${transfer.tokenContract ? "text-purple-700" : "text-gray-900 dark:text-gray-100"}`}>
                     <TokenAmount transfer={transfer} />
                   </p>
                 )}
@@ -242,7 +242,7 @@ export function TransactionsTable({ transactions, compact, accountFilter }: Tran
                       +{formatBalance(reward.amount)} SOLEN
                     </p>
                     {rewardCount > 1 && (
-                      <p className="text-xs text-gray-400">{rewardCount} payouts</p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500">{rewardCount} payouts</p>
                     )}
                   </div>
                 )}
@@ -262,11 +262,11 @@ export function TransactionsTable({ transactions, compact, accountFilter }: Tran
                   </p>
                 )}
                 {!isReward && !isStake && !mintAmount && !transfer && (tx.success ? (
-                  <span className="inline-flex items-center rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700 ring-1 ring-green-600/20">
+                  <span className="inline-flex items-center rounded-full bg-green-50 dark:bg-green-900/30 px-2 py-0.5 text-xs font-medium text-green-700 ring-1 ring-green-600/20 dark:ring-green-400/20">
                     Success
                   </span>
                 ) : (
-                  <span className="inline-flex items-center rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700 ring-1 ring-red-600/20">
+                  <span className="inline-flex items-center rounded-full bg-red-50 dark:bg-red-900/30 px-2 py-0.5 text-xs font-medium text-red-700 ring-1 ring-red-600/20 dark:ring-red-400/20">
                     Failed
                   </span>
                 ))}
@@ -282,7 +282,7 @@ export function TransactionsTable({ transactions, compact, accountFilter }: Tran
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-gray-200 text-left text-gray-500">
+          <tr className="border-b border-gray-200 dark:border-gray-700 text-left text-gray-500 dark:text-gray-400">
             <th className="pb-3 pr-4 font-medium">Txn</th>
             <th className="pb-3 pr-4 font-medium">Block</th>
             <th className="pb-3 pr-4 font-medium">From</th>
@@ -333,7 +333,7 @@ export function TransactionsTable({ transactions, compact, accountFilter }: Tran
             return (
               <tr
                 key={`${tx.block_height}-${tx.index}`}
-                className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
               >
                 <td className="py-3 pr-4">
                   <Link
@@ -353,7 +353,7 @@ export function TransactionsTable({ transactions, compact, accountFilter }: Tran
                 </td>
                 <td className="py-3 pr-4">
                   {reward ? (
-                    <span className="inline-flex items-center rounded-md bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700">
+                    <span className="inline-flex items-center rounded-md bg-amber-50 dark:bg-amber-900/30 px-2 py-0.5 text-xs font-medium text-amber-700">
                       Staking Pool
                     </span>
                   ) : (
@@ -392,7 +392,7 @@ export function TransactionsTable({ transactions, compact, accountFilter }: Tran
                       {truncateHash(transfer.to)}
                     </Link>
                   ) : (
-                    <span className="text-gray-400 text-xs">-</span>
+                    <span className="text-gray-400 dark:text-gray-500 text-xs">-</span>
                   )}
                 </td>
                 <td className="py-3 pr-4 font-medium">
@@ -402,7 +402,7 @@ export function TransactionsTable({ transactions, compact, accountFilter }: Tran
                     <span className="text-amber-700" title={`${rewardCount} payouts`}>+{formatBalance(reward.amount)} SOLEN</span>
                   ) : transfer ? (
                     <div>
-                      <span className={transfer.tokenContract ? "text-purple-700" : "text-gray-900"}>
+                      <span className={transfer.tokenContract ? "text-purple-700" : "text-gray-900 dark:text-gray-100"}>
                         <TokenAmount transfer={transfer} />
                       </span>
                       {solverTip && (
@@ -418,37 +418,37 @@ export function TransactionsTable({ transactions, compact, accountFilter }: Tran
                       <TokenAmount transfer={{ amount: mintAmt, tokenContract: mintEvt.emitter }} />
                     </span>
                   ) : (
-                    <span className="text-gray-400">-</span>
+                    <span className="text-gray-400 dark:text-gray-500">-</span>
                   )}
                 </td>
                 <td className="py-3 pr-4">
                   {slashInfo ? (
-                    <span className="inline-flex items-center rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700 ring-1 ring-red-600/20">
+                    <span className="inline-flex items-center rounded-full bg-red-50 dark:bg-red-900/30 px-2 py-0.5 text-xs font-medium text-red-700 ring-1 ring-red-600/20 dark:ring-red-400/20">
                       Slash
                     </span>
                   ) : isIntent ? (
-                    <span className="inline-flex items-center rounded-full bg-cyan-50 px-2 py-0.5 text-xs font-medium text-cyan-700 ring-1 ring-cyan-600/20">
+                    <span className="inline-flex items-center rounded-full bg-cyan-50 dark:bg-cyan-900/30 px-2 py-0.5 text-xs font-medium text-cyan-700 ring-1 ring-cyan-600/20 dark:ring-cyan-400/20">
                       Intent
                     </span>
                   ) : tx.success ? (
-                    <span className="inline-flex items-center rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700 ring-1 ring-green-600/20">
+                    <span className="inline-flex items-center rounded-full bg-green-50 dark:bg-green-900/30 px-2 py-0.5 text-xs font-medium text-green-700 ring-1 ring-green-600/20 dark:ring-green-400/20">
                       Success
                     </span>
                   ) : (
                     <span
-                      className="inline-flex items-center rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700 ring-1 ring-red-600/20"
+                      className="inline-flex items-center rounded-full bg-red-50 dark:bg-red-900/30 px-2 py-0.5 text-xs font-medium text-red-700 ring-1 ring-red-600/20 dark:ring-red-400/20"
                       title={tx.error || undefined}
                     >
                       Failed
                     </span>
                   )}
                 </td>
-                <td className="py-3 pr-4 text-gray-600">
+                <td className="py-3 pr-4 text-gray-600 dark:text-gray-400">
                   {formatGas(tx.gas_used)}
                 </td>
-                <td className="py-3 text-gray-600">
+                <td className="py-3 text-gray-600 dark:text-gray-400">
                   {tx.events.length > 0 && (
-                    <span className="inline-flex items-center rounded-md bg-purple-50 px-2 py-0.5 text-xs font-medium text-purple-700">
+                    <span className="inline-flex items-center rounded-md bg-purple-50 dark:bg-purple-900/30 px-2 py-0.5 text-xs font-medium text-purple-700">
                       {tx.events.length}
                     </span>
                   )}

@@ -116,12 +116,12 @@ export default function AccountPage() {
       {/* Account header */}
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-2">
-          <h1 className="text-2xl font-bold text-gray-900">Account</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Account</h1>
           {account && (
             <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
               isContract
-                ? "bg-purple-50 text-purple-700 ring-1 ring-purple-600/20"
-                : "bg-gray-100 text-gray-700 ring-1 ring-gray-500/20"
+                ? "bg-purple-50 dark:bg-purple-900/30 text-purple-700 ring-1 ring-purple-600/20 dark:ring-purple-400/20"
+                : "bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 ring-1 ring-gray-500/20 dark:ring-gray-400/20"
             }`}>
               {isContract ? "Smart Account" : "Standard Account"}
             </span>
@@ -129,8 +129,8 @@ export default function AccountPage() {
           {isValidator && (
             <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
               isValidator.active
-                ? "bg-green-50 text-green-700 ring-1 ring-green-600/20"
-                : "bg-yellow-50 text-yellow-700 ring-1 ring-yellow-600/20"
+                ? "bg-green-50 dark:bg-green-900/30 text-green-700 ring-1 ring-green-600/20 dark:ring-green-400/20"
+                : "bg-yellow-50 dark:bg-yellow-900/30 text-yellow-700 ring-1 ring-yellow-600/20 dark:ring-yellow-400/20"
             }`}>
               <span className={`mr-1 h-1.5 w-1.5 rounded-full ${isValidator.active ? "bg-green-500" : "bg-yellow-500"}`} />
               {isValidator.genesis ? "Genesis Validator" : "Validator"}
@@ -138,7 +138,7 @@ export default function AccountPage() {
           )}
         </div>
         <div className="flex items-center gap-1">
-          <p className="font-mono text-sm text-gray-500 break-all">
+          <p className="font-mono text-sm text-gray-500 dark:text-gray-400 break-all">
             {accountId}
           </p>
           <CopyButton text={accountId} />
@@ -150,31 +150,31 @@ export default function AccountPage() {
       {/* Overview cards */}
       {account && (
         <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-            <p className="text-xs text-gray-500 uppercase tracking-wide">Balance</p>
-            <p className="mt-1.5 text-2xl font-semibold text-gray-900">
+          <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-900 p-5 shadow-sm">
+            <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Balance</p>
+            <p className="mt-1.5 text-2xl font-semibold text-gray-900 dark:text-gray-100">
               {formatBalance(account.balance)}
             </p>
-            <p className="text-xs text-gray-400 mt-0.5">SOLEN</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">SOLEN</p>
           </div>
-          <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-            <p className="text-xs text-gray-500 uppercase tracking-wide">Nonce</p>
-            <p className="mt-1.5 text-2xl font-semibold text-gray-900">
+          <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-900 p-5 shadow-sm">
+            <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Nonce</p>
+            <p className="mt-1.5 text-2xl font-semibold text-gray-900 dark:text-gray-100">
               {formatNumber(account.nonce)}
             </p>
-            <p className="text-xs text-gray-400 mt-0.5">total operations</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">total operations</p>
           </div>
-          <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-            <p className="text-xs text-gray-500 uppercase tracking-wide">Code Hash</p>
+          <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-900 p-5 shadow-sm">
+            <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Code Hash</p>
             {isContract ? (
               <>
-                <p className="mt-1.5 font-mono text-sm text-gray-900 break-all">
+                <p className="mt-1.5 font-mono text-sm text-gray-900 dark:text-gray-100 break-all">
                   {truncateHash(account.code_hash, 12)}
                 </p>
                 <CopyButton text={account.code_hash} />
               </>
             ) : (
-              <p className="mt-1.5 text-sm text-gray-400">No contract deployed</p>
+              <p className="mt-1.5 text-sm text-gray-400 dark:text-gray-500">No contract deployed</p>
             )}
           </div>
         </div>
@@ -182,20 +182,20 @@ export default function AccountPage() {
 
       {/* Token balances */}
       {tokenBalances.length > 0 && (
-        <div className="mb-6 rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-          <h3 className="text-sm font-semibold text-gray-900 mb-3">Token Balances</h3>
+        <div className="mb-6 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-900 p-5 shadow-sm">
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Token Balances</h3>
           <div className="space-y-2">
             {tokenBalances.map((token) => (
-              <div key={token.contract} className="flex items-center justify-between py-2 px-3 rounded-lg bg-gray-50">
+              <div key={token.contract} className="flex items-center justify-between py-2 px-3 rounded-lg bg-gray-50 dark:bg-slate-950">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs bg-purple-100 text-purple-700 rounded-full px-2 py-0.5 font-medium">
+                  <span className="text-xs bg-purple-100 dark:bg-purple-900/40 text-purple-700 rounded-full px-2 py-0.5 font-medium">
                     {token.symbol}
                   </span>
                   <Link href={`/account/${token.contract}`} className="text-sm text-indigo-600 hover:text-indigo-800">
                     {token.name}
                   </Link>
                 </div>
-                <span className="font-mono text-sm font-medium text-gray-900">
+                <span className="font-mono text-sm font-medium text-gray-900 dark:text-gray-100">
                   {formatTokenBalance(token.balance, token.decimals)}
                 </span>
               </div>
@@ -205,8 +205,8 @@ export default function AccountPage() {
       )}
 
       {/* Tabs */}
-      <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-        <div className="border-b border-gray-200 bg-gray-50/50">
+      <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-900 shadow-sm overflow-hidden">
+        <div className="border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-slate-800/50">
           <div className="flex gap-0">
             {[
               { id: "txs" as const, label: "Transactions" },
@@ -218,8 +218,8 @@ export default function AccountPage() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`px-6 py-3 text-sm font-medium transition-colors ${
                   activeTab === tab.id
-                    ? "border-b-2 border-indigo-600 text-indigo-600 bg-white"
-                    : "text-gray-500 hover:text-gray-700"
+                    ? "border-b-2 border-indigo-600 text-indigo-600 bg-white dark:bg-slate-900"
+                    : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                 }`}
               >
                 {tab.label}
@@ -233,28 +233,28 @@ export default function AccountPage() {
             txs.length > 0 ? (
               <>
                 <TransactionsTable transactions={txs} accountFilter={accountId} />
-                <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
+                <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
                   <button
                     onClick={() => setTxPage((p) => Math.max(0, p - 1))}
                     disabled={txPage === 0}
-                    className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    className="rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                   >
                     Previous
                   </button>
-                  <span className="text-sm text-gray-500">
+                  <span className="text-sm text-gray-500 dark:text-gray-400">
                     Page {txPage + 1}
                   </span>
                   <button
                     onClick={() => setTxPage((p) => p + 1)}
                     disabled={!hasMoreTxs}
-                    className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    className="rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                   >
                     Next
                   </button>
                 </div>
               </>
             ) : (
-              <p className="py-8 text-center text-gray-400">
+              <p className="py-8 text-center text-gray-400 dark:text-gray-500">
                 No transactions found for this account
               </p>
             )
@@ -389,11 +389,11 @@ function ContractTab({ contractId, account }: { contractId: string; account: Acc
     <div className="space-y-6">
       {/* Token metadata */}
       {tokenMeta && (
-        <div className="rounded-lg bg-purple-50 border border-purple-200 p-4">
+        <div className="rounded-lg bg-purple-50 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-800 p-4">
           <div className="flex items-center gap-2 mb-2">
             <h3 className="text-sm font-semibold text-purple-900">SRC-20 Token</h3>
             {tokenMeta.symbol && (
-              <span className="text-xs bg-purple-200 text-purple-800 rounded-full px-2 py-0.5 font-medium">
+              <span className="text-xs bg-purple-200 dark:bg-purple-800 text-purple-800 rounded-full px-2 py-0.5 font-medium">
                 {tokenMeta.symbol}
               </span>
             )}
@@ -401,28 +401,28 @@ function ContractTab({ contractId, account }: { contractId: string; account: Acc
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
             {tokenMeta.name && (
               <div>
-                <span className="text-gray-500 text-xs">Name</span>
+                <span className="text-gray-500 dark:text-gray-400 text-xs">Name</span>
                 <p className="font-medium text-purple-900">{tokenMeta.name}</p>
               </div>
             )}
             {tokenMeta.symbol && (
               <div>
-                <span className="text-gray-500 text-xs">Symbol</span>
+                <span className="text-gray-500 dark:text-gray-400 text-xs">Symbol</span>
                 <p className="font-medium text-purple-900">{tokenMeta.symbol}</p>
               </div>
             )}
             <div>
-              <span className="text-gray-500 text-xs">Decimals</span>
+              <span className="text-gray-500 dark:text-gray-400 text-xs">Decimals</span>
               <p className="font-medium text-purple-900">{tokenMeta.decimals}</p>
             </div>
             <div>
-              <span className="text-gray-500 text-xs">Total Supply</span>
+              <span className="text-gray-500 dark:text-gray-400 text-xs">Total Supply</span>
               <p className="font-medium text-purple-900">{formatTokenBalance(tokenMeta.totalSupply, tokenMeta.decimals)}</p>
             </div>
           </div>
           {owner && (
-            <div className="mt-3 pt-3 border-t border-purple-200 text-sm">
-              <span className="text-gray-500 text-xs">Owner</span>
+            <div className="mt-3 pt-3 border-t border-purple-200 dark:border-purple-800 text-sm">
+              <span className="text-gray-500 dark:text-gray-400 text-xs">Owner</span>
               <p className="font-mono text-xs mt-0.5">
                 <Link href={`/account/${owner}`} className="text-indigo-600 hover:text-indigo-800">
                   {owner}
@@ -435,13 +435,13 @@ function ContractTab({ contractId, account }: { contractId: string; account: Acc
 
       {/* Read contract */}
       <div>
-        <h3 className="text-sm font-semibold text-gray-900 mb-3">Read Contract</h3>
+        <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Read Contract</h3>
         <div className="flex flex-col sm:flex-row gap-2">
           {methods.length > 0 ? (
             <select
               value={method}
               onChange={(e) => { setMethod(e.target.value); setArgs(""); setResult(null); }}
-              className="rounded-lg border border-gray-300 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
               {methods.map((m) => (
                 <option key={m.name} value={m.name}>
@@ -455,7 +455,7 @@ function ContractTab({ contractId, account }: { contractId: string; account: Acc
               value={method}
               onChange={(e) => setMethod(e.target.value)}
               placeholder="Method name"
-              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           )}
           {selectedMethod?.args && (
@@ -464,7 +464,7 @@ function ContractTab({ contractId, account }: { contractId: string; account: Acc
               value={args}
               onChange={(e) => setArgs(e.target.value)}
               placeholder={selectedMethod.args.replace(/\+/g, " + ")}
-              className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm font-mono placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           )}
           <button
@@ -479,32 +479,32 @@ function ContractTab({ contractId, account }: { contractId: string; account: Acc
         {result && (
           <div className={`mt-3 rounded-lg border p-3 text-sm ${
             result.success
-              ? "bg-green-50 border-green-200"
-              : "bg-red-50 border-red-200"
+              ? "bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-800"
+              : "bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-800"
           }`}>
             {result.success ? (
               <div className="space-y-1">
                 <div>
-                  <span className="text-gray-500">Return data:</span>{" "}
-                  <span className="font-mono text-gray-900 break-all">{result.return_data}</span>
+                  <span className="text-gray-500 dark:text-gray-400">Return data:</span>{" "}
+                  <span className="font-mono text-gray-900 dark:text-gray-100 break-all">{result.return_data}</span>
                 </div>
                 {result.return_data.length === 32 && (
                   <div>
-                    <span className="text-gray-500">As u128:</span>{" "}
-                    <span className="font-mono text-gray-900 font-medium">
+                    <span className="text-gray-500 dark:text-gray-400">As u128:</span>{" "}
+                    <span className="font-mono text-gray-900 dark:text-gray-100 font-medium">
                       {bytesToU128(hexToBytes(result.return_data)).toString()}
                     </span>
                   </div>
                 )}
                 {result.return_data.length > 0 && result.return_data.length !== 32 && (
                   <div>
-                    <span className="text-gray-500">As text:</span>{" "}
-                    <span className="text-gray-900">
+                    <span className="text-gray-500 dark:text-gray-400">As text:</span>{" "}
+                    <span className="text-gray-900 dark:text-gray-100">
                       {new TextDecoder().decode(hexToBytes(result.return_data))}
                     </span>
                   </div>
                 )}
-                <div className="text-gray-400">Gas used: {result.gas_used}</div>
+                <div className="text-gray-400 dark:text-gray-500">Gas used: {result.gas_used}</div>
               </div>
             ) : (
               <div className="text-red-700">{result.error}</div>
@@ -516,21 +516,21 @@ function ContractTab({ contractId, account }: { contractId: string; account: Acc
       {/* Write contract */}
       {abi && abi.methods.filter((m) => m.mutates && m.name !== "abi" && m.name !== "init").length > 0 && (
         <div>
-          <h3 className="text-sm font-semibold text-gray-900 mb-3">Write Contract</h3>
-          <p className="text-xs text-gray-500 mb-3">
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Write Contract</h3>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
             To call write methods, use the CLI:
           </p>
           <div className="space-y-2">
             {abi.methods
               .filter((m) => m.mutates && m.name !== "abi" && m.name !== "init")
               .map((m) => (
-                <div key={m.name} className="rounded-lg bg-gray-50 border border-gray-200 p-3">
+                <div key={m.name} className="rounded-lg bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-gray-700 p-3">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="font-mono text-sm font-medium text-gray-900">{m.name}</span>
-                    <span className="text-xs text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded">write</span>
+                    <span className="font-mono text-sm font-medium text-gray-900 dark:text-gray-100">{m.name}</span>
+                    <span className="text-xs text-orange-600 bg-orange-50 dark:bg-orange-900/30 px-1.5 py-0.5 rounded">write</span>
                   </div>
                   {m.args && (
-                    <p className="text-xs text-gray-500 mb-2">Args: {m.args.replace(/\+/g, " + ")}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Args: {m.args.replace(/\+/g, " + ")}</p>
                   )}
                   <code className="block text-xs bg-gray-900 text-green-400 p-2 rounded font-mono break-all">
                     solen --chain-id 9000 call &lt;key&gt; {contractId.slice(0, 16)}... {m.name}{m.args ? " --args <hex>" : ""}
@@ -544,22 +544,22 @@ function ContractTab({ contractId, account }: { contractId: string; account: Acc
       {/* Events ABI */}
       {abi && abi.events.length > 0 && (
         <div>
-          <h3 className="text-sm font-semibold text-gray-900 mb-3">Events</h3>
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Events</h3>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-200 text-left text-gray-500">
+                <tr className="border-b border-gray-200 dark:border-gray-700 text-left text-gray-500 dark:text-gray-400">
                   <th className="pb-2 pr-4 font-medium">Topic</th>
                   <th className="pb-2 font-medium">Data Format</th>
                 </tr>
               </thead>
               <tbody>
                 {abi.events.map((e, i) => (
-                  <tr key={i} className="border-b border-gray-100">
+                  <tr key={i} className="border-b border-gray-100 dark:border-gray-800">
                     <td className="py-2 pr-4">
-                      <span className="font-mono text-xs bg-purple-50 text-purple-700 px-2 py-0.5 rounded">{e.topic}</span>
+                      <span className="font-mono text-xs bg-purple-50 dark:bg-purple-900/30 text-purple-700 px-2 py-0.5 rounded">{e.topic}</span>
                     </td>
-                    <td className="py-2 font-mono text-xs text-gray-600">{e.data.replace(/\+/g, " + ")}</td>
+                    <td className="py-2 font-mono text-xs text-gray-600 dark:text-gray-400">{e.data.replace(/\+/g, " + ")}</td>
                   </tr>
                 ))}
               </tbody>
@@ -592,10 +592,10 @@ function SourceCode({ contractId, codeHash }: { contractId: string; codeHash: st
   if (!source) {
     return (
       <div>
-        <h3 className="text-sm font-semibold text-gray-900 mb-3">Source Code</h3>
-        <div className="rounded-lg bg-gray-50 border border-gray-200 p-4 text-center">
-          <p className="text-sm text-gray-500 mb-2">Source code not published</p>
-          <p className="text-xs text-gray-400">
+        <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Source Code</h3>
+        <div className="rounded-lg bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-gray-700 p-4 text-center">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Source code not published</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500">
             Contract deployers can publish source via the API:
           </p>
           <code className="block text-xs bg-gray-900 text-green-400 p-2 rounded font-mono mt-2 text-left">
@@ -609,14 +609,14 @@ function SourceCode({ contractId, codeHash }: { contractId: string; codeHash: st
   return (
     <div>
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-semibold text-gray-900">Source Code</h3>
+        <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Source Code</h3>
         <div className="flex items-center gap-2">
           {source.verified ? (
-            <span className="text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded-full font-medium ring-1 ring-green-600/20">Verified</span>
+            <span className="text-xs bg-green-50 dark:bg-green-900/30 text-green-700 px-2 py-0.5 rounded-full font-medium ring-1 ring-green-600/20 dark:ring-green-400/20">Verified</span>
           ) : (
-            <span className="text-xs bg-yellow-50 text-yellow-700 px-2 py-0.5 rounded-full font-medium ring-1 ring-yellow-600/20">Unverified</span>
+            <span className="text-xs bg-yellow-50 dark:bg-yellow-900/30 text-yellow-700 px-2 py-0.5 rounded-full font-medium ring-1 ring-yellow-600/20 dark:ring-yellow-400/20">Unverified</span>
           )}
-          <span className="text-xs text-gray-400">{source.language} · {source.compiler_version}</span>
+          <span className="text-xs text-gray-400 dark:text-gray-500">{source.language} · {source.compiler_version}</span>
         </div>
       </div>
       <pre className="rounded-lg bg-gray-900 text-gray-100 p-4 text-xs font-mono overflow-x-auto max-h-96 overflow-y-auto">
@@ -627,7 +627,7 @@ function SourceCode({ contractId, codeHash }: { contractId: string; codeHash: st
           This source code has been verified — it compiles to the exact bytecode deployed on-chain.
         </p>
       ) : (
-        <p className="mt-2 text-xs text-gray-400">
+        <p className="mt-2 text-xs text-gray-400 dark:text-gray-500">
           This source code has not been verified against the on-chain bytecode. It was submitted by the deployer and may not match the actual contract.
         </p>
       )}
@@ -683,20 +683,20 @@ function HoldersTab({ contractId }: { contractId: string }) {
     return () => { mounted = false; };
   }, [network, contractId]);
 
-  if (loading) return <div className="py-8 text-center text-gray-400">Loading holders...</div>;
+  if (loading) return <div className="py-8 text-center text-gray-400 dark:text-gray-500">Loading holders...</div>;
 
   if (holders.length === 0) {
-    return <div className="py-8 text-center text-gray-400">No holders found</div>;
+    return <div className="py-8 text-center text-gray-400 dark:text-gray-500">No holders found</div>;
   }
 
   const totalSupply = holders.reduce((sum, h) => sum + BigInt(h.balance), BigInt(0));
 
   return (
     <div>
-      <p className="text-sm text-gray-500 mb-4">{holders.length} holder{holders.length !== 1 ? "s" : ""}</p>
+      <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{holders.length} holder{holders.length !== 1 ? "s" : ""}</p>
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-gray-200 text-left text-gray-500">
+          <tr className="border-b border-gray-200 dark:border-gray-700 text-left text-gray-500 dark:text-gray-400">
             <th className="pb-3 pr-4 font-medium">#</th>
             <th className="pb-3 pr-4 font-medium">Address</th>
             <th className="pb-3 pr-4 font-medium text-right">Balance</th>
@@ -709,8 +709,8 @@ function HoldersTab({ contractId }: { contractId: string }) {
               ? Number((BigInt(h.balance) * BigInt(10000)) / totalSupply) / 100
               : 0;
             return (
-              <tr key={h.address} className="border-b border-gray-100 hover:bg-gray-50">
-                <td className="py-3 pr-4 text-gray-400">{i + 1}</td>
+              <tr key={h.address} className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-slate-800">
+                <td className="py-3 pr-4 text-gray-400 dark:text-gray-500">{i + 1}</td>
                 <td className="py-3 pr-4">
                   <Link
                     href={`/account/${h.address}`}
@@ -719,18 +719,18 @@ function HoldersTab({ contractId }: { contractId: string }) {
                     {truncateHash(h.address, 10)}
                   </Link>
                 </td>
-                <td className="py-3 pr-4 text-right font-mono text-gray-900">
+                <td className="py-3 pr-4 text-right font-mono text-gray-900 dark:text-gray-100">
                   {formatNumber(Number(h.balance))}
                 </td>
                 <td className="py-3 text-right">
                   <div className="flex items-center justify-end gap-2">
-                    <div className="w-16 bg-gray-100 rounded-full h-2">
+                    <div className="w-16 bg-gray-100 dark:bg-slate-800 rounded-full h-2">
                       <div
                         className="bg-purple-500 h-2 rounded-full"
                         style={{ width: `${Math.min(pct, 100)}%` }}
                       />
                     </div>
-                    <span className="text-xs text-gray-500 w-12 text-right">{pct.toFixed(1)}%</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 w-12 text-right">{pct.toFixed(1)}%</span>
                   </div>
                 </td>
               </tr>
@@ -769,11 +769,11 @@ function DetailRow({
   mono?: boolean;
 }) {
   return (
-    <div className="flex flex-col sm:flex-row border-b border-gray-100 last:border-0">
-      <div className="px-4 py-3 text-sm font-medium text-gray-500 sm:w-44">
+    <div className="flex flex-col sm:flex-row border-b border-gray-100 dark:border-gray-800 last:border-0">
+      <div className="px-4 py-3 text-sm font-medium text-gray-500 dark:text-gray-400 sm:w-44">
         {label}
       </div>
-      <div className={`px-4 py-3 text-sm text-gray-900 flex-1 break-all ${mono ? "font-mono" : ""}`}>
+      <div className={`px-4 py-3 text-sm text-gray-900 dark:text-gray-100 flex-1 break-all ${mono ? "font-mono" : ""}`}>
         {children}
       </div>
     </div>

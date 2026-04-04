@@ -71,42 +71,42 @@ export default function BlockDetailPage() {
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8">
       <div className="mb-6 flex items-center gap-3">
-        <h1 className="text-2xl font-bold text-gray-900">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
           Block #{formatNumber(b.height)}
         </h1>
         <div className="flex gap-1">
           {b.height > 0 && (
             <Link
               href={`/block/${b.height - 1}`}
-              className="rounded-lg border border-gray-300 px-2.5 py-1 text-xs text-gray-600 hover:bg-gray-50 transition-colors"
+              className="rounded-lg border border-gray-300 dark:border-gray-600 px-2.5 py-1 text-xs text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
             >
               &larr; Prev
             </Link>
           )}
           <Link
             href={`/block/${b.height + 1}`}
-            className="rounded-lg border border-gray-300 px-2.5 py-1 text-xs text-gray-600 hover:bg-gray-50 transition-colors"
+            className="rounded-lg border border-gray-300 dark:border-gray-600 px-2.5 py-1 text-xs text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
           >
             Next &rarr;
           </Link>
         </div>
       </div>
 
-      <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden mb-6">
+      <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-900 shadow-sm overflow-hidden mb-6">
         <Row label="Block Height" value={formatNumber(b.height)} />
         <Row label="Epoch" value={b.epoch.toString()} />
         <Row label="Timestamp">
           <span>{formatTimestamp(b.timestamp_ms)}</span>
-          <span className="ml-2 text-gray-400 text-xs">({timeAgo(b.timestamp_ms)})</span>
+          <span className="ml-2 text-gray-400 dark:text-gray-500 text-xs">({timeAgo(b.timestamp_ms)})</span>
         </Row>
         <Row label="Transactions">
-          <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
+          <span className="inline-flex items-center rounded-md bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 text-xs font-medium text-blue-700">
             {b.tx_count} transaction{b.tx_count !== 1 ? "s" : ""}
           </span>
         </Row>
         <Row label="Gas Used">
-          <span className="font-semibold text-gray-900">{formatBalance(b.gas_used.toString())} SOLEN</span>
-          <span className="ml-2 text-xs text-gray-400">(raw: {formatNumber(b.gas_used)})</span>
+          <span className="font-semibold text-gray-900 dark:text-gray-100">{formatBalance(b.gas_used.toString())} SOLEN</span>
+          <span className="ml-2 text-xs text-gray-400 dark:text-gray-500">(raw: {formatNumber(b.gas_used)})</span>
         </Row>
         <Row label="Proposer">
           <Link
@@ -118,21 +118,21 @@ export default function BlockDetailPage() {
           <CopyButton text={b.proposer} />
         </Row>
         <Row label="Parent Hash">
-          <span className="font-mono text-sm break-all text-gray-700">{b.parent_hash}</span>
+          <span className="font-mono text-sm break-all text-gray-700 dark:text-gray-300">{b.parent_hash}</span>
           <CopyButton text={b.parent_hash} />
         </Row>
         <Row label="State Root">
-          <span className="font-mono text-sm break-all text-gray-700">{b.state_root}</span>
+          <span className="font-mono text-sm break-all text-gray-700 dark:text-gray-300">{b.state_root}</span>
           <CopyButton text={b.state_root} />
         </Row>
         {rpcBlock && (
           <>
             <Row label="Transactions Root">
-              <span className="font-mono text-sm break-all text-gray-700">{rpcBlock.transactions_root}</span>
+              <span className="font-mono text-sm break-all text-gray-700 dark:text-gray-300">{rpcBlock.transactions_root}</span>
               <CopyButton text={rpcBlock.transactions_root} />
             </Row>
             <Row label="Receipts Root">
-              <span className="font-mono text-sm break-all text-gray-700">{rpcBlock.receipts_root}</span>
+              <span className="font-mono text-sm break-all text-gray-700 dark:text-gray-300">{rpcBlock.receipts_root}</span>
               <CopyButton text={rpcBlock.receipts_root} />
             </Row>
           </>
@@ -141,9 +141,9 @@ export default function BlockDetailPage() {
 
       {/* Block Transactions */}
       {txs.length > 0 && (
-        <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
-            <h2 className="font-semibold text-gray-900">
+        <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-900 shadow-sm overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-slate-800/50">
+            <h2 className="font-semibold text-gray-900 dark:text-gray-100">
               Transactions ({txs.length})
             </h2>
           </div>
@@ -166,11 +166,11 @@ function Row({
   children?: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col sm:flex-row border-b border-gray-100 last:border-0">
-      <div className="px-6 py-3.5 text-sm font-medium text-gray-500 sm:w-48 bg-gray-50/50">
+    <div className="flex flex-col sm:flex-row border-b border-gray-100 dark:border-gray-800 last:border-0">
+      <div className="px-6 py-3.5 text-sm font-medium text-gray-500 dark:text-gray-400 sm:w-48 bg-gray-50/50 dark:bg-slate-800/50">
         {label}
       </div>
-      <div className="px-6 py-3.5 text-sm text-gray-900 flex-1 flex items-center gap-1">
+      <div className="px-6 py-3.5 text-sm text-gray-900 dark:text-gray-100 flex-1 flex items-center gap-1">
         {value || children}
       </div>
     </div>
