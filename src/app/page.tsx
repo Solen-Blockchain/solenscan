@@ -259,7 +259,7 @@ export default function HomePage() {
             <div>
               <span className="text-gray-500 dark:text-gray-400 text-xs">Base Fee</span>
               <p className="font-semibold text-gray-900 dark:text-gray-100 mt-1">
-                {chainStatus.config.base_fee_per_gas === "0" ? "None" : formatBalance(chainStatus.config.base_fee_per_gas)}
+                {formatBalance(chainStatus.config.base_fee_per_gas)} SOLEN/gas
               </p>
             </div>
             <div>
