@@ -10,7 +10,6 @@ import { SearchBar } from "./SearchBar";
 import { NetworkBanner } from "./NetworkBanner";
 
 const navItems = [
-  { href: "/", label: "Home" },
   { href: "/blocks", label: "Blocks" },
   { href: "/txs", label: "Transactions" },
   { href: "/events", label: "Events" },
