@@ -142,7 +142,7 @@ export default function AccountPage() {
           {account && (
             <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
               isContract
-                ? "bg-purple-50 dark:bg-purple-900/30 text-purple-700 ring-1 ring-purple-600/20 dark:ring-purple-400/20"
+                ? "bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 ring-1 ring-emerald-600/20 dark:ring-emerald-400/20"
                 : "bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 ring-1 ring-gray-500/20 dark:ring-gray-400/20"
             }`}>
               {isContract ? "Smart Account" : "Standard Account"}
@@ -210,10 +210,10 @@ export default function AccountPage() {
             {tokenBalances.map((token) => (
               <div key={token.contract} className="flex items-center justify-between py-2 px-3 rounded-lg bg-gray-50 dark:bg-slate-950">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs bg-purple-100 dark:bg-purple-900/40 text-purple-700 rounded-full px-2 py-0.5 font-medium">
+                  <span className="text-xs bg-emerald-100 dark:bg-emerald-800/40 text-emerald-700 dark:text-emerald-300 rounded-full px-2 py-0.5 font-medium">
                     {token.symbol}
                   </span>
-                  <Link href={`/account/${token.contract}`} className="text-sm text-indigo-600 hover:text-indigo-800">
+                  <Link href={`/account/${token.contract}`} className="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300">
                     {token.name}
                   </Link>
                 </div>
@@ -412,11 +412,11 @@ function ContractTab({ contractId, account }: { contractId: string; account: Acc
     <div className="space-y-6">
       {/* Token metadata */}
       {tokenMeta && (
-        <div className="rounded-lg bg-purple-50 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-800 p-4">
+        <div className="rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/50 p-4">
           <div className="flex items-center gap-2 mb-2">
-            <h3 className="text-sm font-semibold text-purple-900">SRC-20 Token</h3>
+            <h3 className="text-sm font-semibold text-emerald-800 dark:text-emerald-300">SRC-20 Token</h3>
             {tokenMeta.symbol && (
-              <span className="text-xs bg-purple-200 dark:bg-purple-800 text-purple-800 rounded-full px-2 py-0.5 font-medium">
+              <span className="text-xs bg-emerald-200 dark:bg-emerald-800/60 text-emerald-800 dark:text-emerald-200 rounded-full px-2 py-0.5 font-medium">
                 {tokenMeta.symbol}
               </span>
             )}
@@ -425,29 +425,29 @@ function ContractTab({ contractId, account }: { contractId: string; account: Acc
             {tokenMeta.name && (
               <div>
                 <span className="text-gray-500 dark:text-gray-400 text-xs">Name</span>
-                <p className="font-medium text-purple-900">{tokenMeta.name}</p>
+                <p className="font-medium text-gray-900 dark:text-gray-100">{tokenMeta.name}</p>
               </div>
             )}
             {tokenMeta.symbol && (
               <div>
                 <span className="text-gray-500 dark:text-gray-400 text-xs">Symbol</span>
-                <p className="font-medium text-purple-900">{tokenMeta.symbol}</p>
+                <p className="font-medium text-gray-900 dark:text-gray-100">{tokenMeta.symbol}</p>
               </div>
             )}
             <div>
               <span className="text-gray-500 dark:text-gray-400 text-xs">Decimals</span>
-              <p className="font-medium text-purple-900">{tokenMeta.decimals}</p>
+              <p className="font-medium text-gray-900 dark:text-gray-100">{tokenMeta.decimals}</p>
             </div>
             <div>
               <span className="text-gray-500 dark:text-gray-400 text-xs">Total Supply</span>
-              <p className="font-medium text-purple-900">{formatTokenBalance(tokenMeta.totalSupply, tokenMeta.decimals)}</p>
+              <p className="font-medium text-gray-900 dark:text-gray-100">{formatTokenBalance(tokenMeta.totalSupply, tokenMeta.decimals)}</p>
             </div>
           </div>
           {owner && (
-            <div className="mt-3 pt-3 border-t border-purple-200 dark:border-purple-800 text-sm">
+            <div className="mt-3 pt-3 border-t border-emerald-200 dark:border-emerald-800/50 text-sm">
               <span className="text-gray-500 dark:text-gray-400 text-xs">Owner</span>
               <p className="font-mono text-xs mt-0.5">
-                <Link href={`/account/${owner}`} className="text-indigo-600 hover:text-indigo-800">
+                <Link href={`/account/${owner}`} className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300">
                   {owner}
                 </Link>
               </p>
@@ -580,7 +580,7 @@ function ContractTab({ contractId, account }: { contractId: string; account: Acc
                 {abi.events.map((e, i) => (
                   <tr key={i} className="border-b border-gray-100 dark:border-gray-800">
                     <td className="py-2 pr-4">
-                      <span className="font-mono text-xs bg-purple-50 dark:bg-purple-900/30 text-purple-700 px-2 py-0.5 rounded">{e.topic}</span>
+                      <span className="font-mono text-xs bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded">{e.topic}</span>
                     </td>
                     <td className="py-2 font-mono text-xs text-gray-600 dark:text-gray-400">{e.data.replace(/\+/g, " + ")}</td>
                   </tr>
@@ -749,7 +749,7 @@ function HoldersTab({ contractId }: { contractId: string }) {
                   <div className="flex items-center justify-end gap-2">
                     <div className="w-16 bg-gray-100 dark:bg-slate-800 rounded-full h-2">
                       <div
-                        className="bg-purple-500 h-2 rounded-full"
+                        className="bg-emerald-500 h-2 rounded-full"
                         style={{ width: `${Math.min(pct, 100)}%` }}
                       />
                     </div>
