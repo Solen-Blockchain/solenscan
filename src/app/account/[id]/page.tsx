@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useNetwork } from "@/context/NetworkContext";
 import { createApi } from "@/lib/api";
 import { AccountInfo, IndexedTx } from "@/lib/types";
-import { formatBalance, formatNumber, formatTokenBalance, isContractAccount, truncateHash, hexToBase58, base58Decode, base58Encode } from "@/lib/utils";
+import { formatBalance, formatNumber, formatTokenBalance, isContractAccount, truncateHash, hexToBase58, base58Decode } from "@/lib/utils";
 import { CopyButton } from "@/components/CopyButton";
 import { TransactionsTable } from "@/components/TransactionsTable";
 import { Loading, ErrorMessage } from "@/components/Loading";
@@ -390,7 +390,7 @@ function ContractTab({ contractId, account }: { contractId: string; account: Acc
         setOwner(hexToBase58(res.return_data));
       }
     });
-  }, [network, contractId]);
+  }, [network, contractId, method]);
 
   const handleQuery = async () => {
     setQuerying(true);
@@ -597,6 +597,7 @@ function ContractTab({ contractId, account }: { contractId: string; account: Acc
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function SourceCode({ contractId, codeHash }: { contractId: string; codeHash: string }) {
   const { network } = useNetwork();
   const [source, setSource] = useState<{ source_code: string; language: string; compiler_version: string; verified?: boolean } | null>(null);

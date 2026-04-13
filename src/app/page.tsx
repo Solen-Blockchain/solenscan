@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useEffect, useState, useMemo } from "react";
+import { useCallback, useRef, useEffect, useState } from "react";
 import Link from "next/link";
 import { useOnBlock } from "@/hooks/useApi";
 import { useBlockSubscription } from "@/hooks/useBlockSubscription";

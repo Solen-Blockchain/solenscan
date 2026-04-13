@@ -56,11 +56,6 @@ function useTokenMeta(contractId: string) {
   return { symbol: symbol || "tokens", decimals };
 }
 
-function TokenSymbol({ contractId }: { contractId: string }) {
-  const { symbol } = useTokenMeta(contractId);
-  return <>{symbol}</>;
-}
-
 function TokenAmount({ amount, contractId }: { amount: string; contractId: string }) {
   const { symbol, decimals } = useTokenMeta(contractId);
   return <>{formatTokenBalance(amount, decimals)} {symbol}</>;
@@ -154,6 +149,7 @@ export default function TxDetailPage() {
     setLoading(true);
     fetchTx();
     return () => { mounted.current = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [network, txId?.height, txId?.index]);
 
   if (loading) return <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8"><Loading /></div>;

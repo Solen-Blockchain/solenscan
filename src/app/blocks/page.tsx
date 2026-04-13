@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useNetwork } from "@/context/NetworkContext";
 import { useBlockSubscription } from "@/hooks/useBlockSubscription";
 import { createApi } from "@/lib/api";
-import { IndexedBlock, ChainStatus } from "@/lib/types";
+import { IndexedBlock } from "@/lib/types";
 import { BlocksTable } from "@/components/BlocksTable";
 import { Pagination } from "@/components/Pagination";
 import { Loading, ErrorMessage } from "@/components/Loading";

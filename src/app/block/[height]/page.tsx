@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useNetwork } from "@/context/NetworkContext";
 import { createApi } from "@/lib/api";
 import { IndexedBlock, BlockInfo, IndexedTx } from "@/lib/types";
-import { formatTimestamp, formatNumber, formatGas, formatBalance, timeAgo } from "@/lib/utils";
+import { formatTimestamp, formatNumber, formatBalance, timeAgo } from "@/lib/utils";
 import { CopyButton } from "@/components/CopyButton";
 import { TransactionsTable } from "@/components/TransactionsTable";
 import { Loading, ErrorMessage } from "@/components/Loading";

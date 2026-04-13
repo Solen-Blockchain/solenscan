@@ -5,7 +5,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { useNetwork } from "@/context/NetworkContext";
 import { useTheme } from "@/context/ThemeContext";
-import { NetworkId, networks, enabledNetworks } from "@/lib/networks";
 import { SearchBar } from "./SearchBar";
 import { NetworkBanner } from "./NetworkBanner";
 
@@ -21,7 +20,7 @@ const navItems = [
 ];
 
 export function Header() {
-  const { networkId, setNetwork } = useNetwork();
+  void useNetwork(); // context needed for re-render on network change
   const { theme, toggleTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
