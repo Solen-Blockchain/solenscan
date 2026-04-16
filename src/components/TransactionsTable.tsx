@@ -135,6 +135,17 @@ export function TransactionsTable({ transactions, compact, accountFilter }: Tran
             ? { solver: hexToBase58(solverTipEvent.data.slice(0, 64)), amount: parseLeU128(solverTipEvent.data.slice(64, 96)) }
             : null;
 
+          // Bridge events
+          const bridgeDepositEvent = tx.events.find((e) => e.topic === "bridge_deposit" && e.data.length >= 136);
+          const bridgeReleaseEvent = tx.events.find((e) => e.topic === "bridge_release" && e.data.length >= 96);
+          const isBridgeDeposit = bridgeDepositEvent !== undefined;
+          const isBridgeRelease = bridgeReleaseEvent !== undefined;
+          const bridgeAmount = isBridgeDeposit
+            ? parseLeU128(bridgeDepositEvent!.data.slice(104, 136))
+            : isBridgeRelease
+              ? parseLeU128(bridgeReleaseEvent!.data.slice(64, 96))
+              : null;
+
           // Parse mint events (new format: to[32]+amount[16]=96 hex, old: amount[16]=32 hex)
           const mintEvent = !transfer ? tx.events.find((e) => e.topic === "mint" && e.data.length >= 32 && !e.emitter.startsWith("ffffffff")) : null;
           const mintAmount = mintEvent
@@ -151,15 +162,17 @@ export function TransactionsTable({ transactions, compact, accountFilter }: Tran
                 <div className={`flex h-10 w-10 items-center justify-center rounded-lg text-xs font-mono ${
                   isSlash
                     ? "bg-red-50 dark:bg-red-900/30 text-red-600"
-                    : isIntent
-                      ? "bg-cyan-50 dark:bg-cyan-900/30 text-cyan-600"
-                      : isReward
-                        ? "bg-amber-50 dark:bg-amber-900/30 text-amber-600"
-                        : (transfer?.tokenContract || mintAmount)
-                          ? "bg-purple-50 dark:bg-purple-900/30 text-purple-600"
-                          : tx.success ? "bg-green-50 dark:bg-green-900/30 text-green-600" : "bg-red-50 dark:bg-red-900/30 text-red-600"
+                    : (isBridgeDeposit || isBridgeRelease)
+                      ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600"
+                      : isIntent
+                        ? "bg-cyan-50 dark:bg-cyan-900/30 text-cyan-600"
+                        : isReward
+                          ? "bg-amber-50 dark:bg-amber-900/30 text-amber-600"
+                          : (transfer?.tokenContract || mintAmount)
+                            ? "bg-purple-50 dark:bg-purple-900/30 text-purple-600"
+                            : tx.success ? "bg-green-50 dark:bg-green-900/30 text-green-600" : "bg-red-50 dark:bg-red-900/30 text-red-600"
                 }`}>
-                  {isSlash ? "⚠" : isIntent ? "⚡" : isReward ? "⛏" : (transfer?.tokenContract || mintAmount) ? "TK" : "Tx"}
+                  {isSlash ? "⚠" : (isBridgeDeposit || isBridgeRelease) ? "🌉" : isIntent ? "⚡" : isReward ? "⛏" : (transfer?.tokenContract || mintAmount) ? "TK" : "Tx"}
                 </div>
                 <div>
                   <div className="flex items-center gap-1.5">
@@ -172,6 +185,16 @@ export function TransactionsTable({ transactions, compact, accountFilter }: Tran
                     {isSlash && (
                       <span className="inline-flex items-center rounded-md bg-red-50 dark:bg-red-900/30 px-1.5 py-0.5 text-xs font-medium text-red-700">
                         Slash
+                      </span>
+                    )}
+                    {isBridgeDeposit && (
+                      <span className="inline-flex items-center rounded-md bg-indigo-50 dark:bg-indigo-900/30 px-1.5 py-0.5 text-xs font-medium text-indigo-700">
+                        Bridge → Base
+                      </span>
+                    )}
+                    {isBridgeRelease && (
+                      <span className="inline-flex items-center rounded-md bg-indigo-50 dark:bg-indigo-900/30 px-1.5 py-0.5 text-xs font-medium text-indigo-700">
+                        Bridge → Solen
                       </span>
                     )}
                     {isIntent && (
@@ -226,12 +249,17 @@ export function TransactionsTable({ transactions, compact, accountFilter }: Tran
                 </div>
               </div>
               <div className="text-right">
+                {bridgeAmount && (
+                  <p className="text-sm font-medium text-indigo-700">
+                    {formatBalance(bridgeAmount)} SOLEN
+                  </p>
+                )}
                 {slash && (
                   <p className="text-sm font-medium text-red-700">
                     -{formatBalance(slash.amount)} SOLEN
                   </p>
                 )}
-                {transfer && (
+                {transfer && !isBridgeDeposit && !isBridgeRelease && (
                   <p className={`text-sm font-medium ${transfer.tokenContract ? "text-purple-700" : "text-gray-900 dark:text-gray-100"}`}>
                     <TokenAmount transfer={transfer} />
                   </p>
@@ -324,6 +352,17 @@ export function TransactionsTable({ transactions, compact, accountFilter }: Tran
               ? { solver: hexToBase58(solverTipEvt.data.slice(0, 64)), amount: parseLeU128(solverTipEvt.data.slice(64, 96)) }
               : null;
 
+            // Bridge events
+            const bridgeDepEvt = tx.events.find((e) => e.topic === "bridge_deposit" && e.data.length >= 136);
+            const bridgeRelEvt = tx.events.find((e) => e.topic === "bridge_release" && e.data.length >= 96);
+            const isBridgeDep = bridgeDepEvt !== undefined;
+            const isBridgeRel = bridgeRelEvt !== undefined;
+            const bridgeAmt = isBridgeDep
+              ? parseLeU128(bridgeDepEvt!.data.slice(104, 136))
+              : isBridgeRel
+                ? parseLeU128(bridgeRelEvt!.data.slice(64, 96))
+                : null;
+
             const mintEvt = !transfer ? tx.events.find((e) => e.topic === "mint" && e.data.length >= 32 && !e.emitter.startsWith("ffffffff")) : null;
             const mintAmt = mintEvt
               ? mintEvt.data.length >= 96
@@ -396,11 +435,13 @@ export function TransactionsTable({ transactions, compact, accountFilter }: Tran
                   )}
                 </td>
                 <td className="py-3 pr-4 font-medium">
-                  {slashInfo ? (
+                  {bridgeAmt ? (
+                    <span className="text-indigo-700">{formatBalance(bridgeAmt)} SOLEN</span>
+                  ) : slashInfo ? (
                     <span className="text-red-700">-{formatBalance(slashInfo.amount)} SOLEN</span>
                   ) : reward ? (
                     <span className="text-amber-700" title={`${rewardCount} payouts`}>+{formatBalance(reward.amount)} SOLEN</span>
-                  ) : transfer ? (
+                  ) : transfer && !isBridgeDep && !isBridgeRel ? (
                     <div>
                       <span className={transfer.tokenContract ? "text-purple-700" : "text-gray-900 dark:text-gray-100"}>
                         <TokenAmount transfer={transfer} />
