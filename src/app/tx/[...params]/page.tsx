@@ -385,6 +385,16 @@ export default function TxDetailPage() {
               const solverTipAmt = isSolverTip ? parseLeU128(event.data.slice(64, 96)) : null;
               const isIntentFulfilled = event.topic === "intent_fulfilled";
               // AMM events
+              // Bridge events
+              const bridgeDeposit = event.topic === "bridge_deposit" && event.data.length >= 136 ? {
+                sender: hexToBase58(event.data.slice(0, 64)),
+                baseRecipient: "0x" + event.data.slice(64, 104),
+                amount: parseLeU128(event.data.slice(104, 136)),
+              } : null;
+              const bridgeRelease = event.topic === "bridge_release" && event.data.length >= 96 ? {
+                recipient: hexToBase58(event.data.slice(0, 64)),
+                amount: parseLeU128(event.data.slice(64, 96)),
+              } : null;
               const ammSwap = event.topic === "swap" ? parseAmmSwap(event.data) : null;
               const ammDeposit = event.topic === "deposit" ? parseAmmDeposit(event.data) : null;
               const ammWithdraw = event.topic === "withdraw" ? parseAmmDeposit(event.data) : null;
@@ -404,7 +414,9 @@ export default function TxDetailPage() {
                               ? "bg-cyan-50 dark:bg-cyan-900/30 text-cyan-700"
                               : event.topic === "swap"
                                 ? "bg-blue-50 dark:bg-blue-900/30 text-blue-700"
-                                : event.topic === "deposit" || event.topic === "withdraw"
+                                : event.topic === "bridge_deposit" || event.topic === "bridge_release"
+                                  ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700"
+                                  : event.topic === "deposit" || event.topic === "withdraw"
                                   ? "bg-green-50 dark:bg-green-900/30 text-green-700"
                                   : event.topic === "liquidity_added" || event.topic === "liquidity_removed"
                                     ? "bg-teal-50 dark:bg-teal-900/30 text-teal-700"
@@ -589,7 +601,41 @@ export default function TxDetailPage() {
                         </div>
                       </div>
                     )}
-                    {!transfer && !reward && !stake && !slashData && !isSolverTip && !isIntentFulfilled && !ammSwap && !ammDeposit && !ammWithdraw && !ammLiqAdded && !ammLiqRemoved && event.data && event.data !== "" && event.data !== "00" && (
+                    {bridgeDeposit && (
+                      <div className="mt-2 rounded-lg bg-indigo-50 dark:bg-indigo-950/30 p-3 space-y-1.5">
+                        <div className="text-xs font-semibold text-indigo-700 dark:text-indigo-400 mb-1">Bridge Deposit (Solen &rarr; Base)</div>
+                        <div className="flex items-center gap-1">
+                          <span className="text-xs text-gray-500 dark:text-gray-400 w-20">From:</span>
+                          <Link href={`/account/${bridgeDeposit.sender}`} className="text-xs text-indigo-600 hover:text-indigo-800 font-mono">
+                            {truncateHash(bridgeDeposit.sender, 12)}
+                          </Link>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className="text-xs text-gray-500 dark:text-gray-400 w-20">Base To:</span>
+                          <span className="text-xs font-mono text-gray-700 dark:text-gray-300">{bridgeDeposit.baseRecipient}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className="text-xs text-gray-500 dark:text-gray-400 w-20">Amount:</span>
+                          <span className="text-sm font-medium text-indigo-700 dark:text-indigo-400">{formatBalance(bridgeDeposit.amount)} SOLEN</span>
+                        </div>
+                      </div>
+                    )}
+                    {bridgeRelease && (
+                      <div className="mt-2 rounded-lg bg-indigo-50 dark:bg-indigo-950/30 p-3 space-y-1.5">
+                        <div className="text-xs font-semibold text-indigo-700 dark:text-indigo-400 mb-1">Bridge Release (Base &rarr; Solen)</div>
+                        <div className="flex items-center gap-1">
+                          <span className="text-xs text-gray-500 dark:text-gray-400 w-20">To:</span>
+                          <Link href={`/account/${bridgeRelease.recipient}`} className="text-xs text-indigo-600 hover:text-indigo-800 font-mono">
+                            {truncateHash(bridgeRelease.recipient, 12)}
+                          </Link>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className="text-xs text-gray-500 dark:text-gray-400 w-20">Amount:</span>
+                          <span className="text-sm font-medium text-indigo-700 dark:text-indigo-400">{formatBalance(bridgeRelease.amount)} SOLEN</span>
+                        </div>
+                      </div>
+                    )}
+                    {!transfer && !reward && !stake && !slashData && !isSolverTip && !isIntentFulfilled && !ammSwap && !ammDeposit && !ammWithdraw && !ammLiqAdded && !ammLiqRemoved && !bridgeDeposit && !bridgeRelease && event.data && event.data !== "" && event.data !== "00" && (
                       <div className="mt-2 rounded-lg bg-gray-50 dark:bg-slate-950 p-3">
                         <span className="text-xs text-gray-500 dark:text-gray-400">Data:</span>
                         <p className="text-xs font-mono text-gray-700 dark:text-gray-300 mt-0.5 break-all">{event.data}</p>

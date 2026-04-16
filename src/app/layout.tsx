@@ -16,6 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://solenscan.io"),
   title: "SolenScan — Solen Blockchain Explorer",
   description: "Block explorer for the Solen blockchain. View blocks, transactions, accounts, validators, contracts, rollups, and governance proposals.",
   keywords: ["Solen", "blockchain", "explorer", "block explorer", "transactions", "validators", "rollups"],
