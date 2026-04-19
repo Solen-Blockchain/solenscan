@@ -80,7 +80,7 @@ export default function RichListPage() {
                   {formatBalance(entry.balance)}
                 </td>
                 <td className="py-3 px-2 text-right font-mono">
-                  {BigInt(entry.staked) > 0n ? (
+                  {entry.staked !== "0" ? (
                     <span className="text-yellow-400">{formatBalance(entry.staked)}</span>
                   ) : (
                     <span className="text-gray-600">-</span>

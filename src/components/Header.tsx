@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useNetwork } from "@/context/NetworkContext";
@@ -8,22 +8,40 @@ import { useTheme } from "@/context/ThemeContext";
 import { SearchBar } from "./SearchBar";
 import { NetworkBanner } from "./NetworkBanner";
 
-const navItems = [
+const mainNavItems = [
   { href: "/blocks", label: "Blocks" },
   { href: "/txs", label: "Transactions" },
   { href: "/events", label: "Events" },
   { href: "/validators", label: "Validators" },
   { href: "/richlist", label: "Rich List" },
+];
+
+const moreNavItems = [
   { href: "/contracts", label: "Contracts" },
   { href: "/governance", label: "Governance" },
   { href: "/rollups", label: "Rollups" },
   { href: "/intents", label: "Intents" },
 ];
 
+const allNavItems = [...mainNavItems, ...moreNavItems];
+
 export function Header() {
   void useNetwork(); // context needed for re-render on network change
   const { theme, toggleTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
+  const moreRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (moreRef.current && !moreRef.current.contains(e.target as Node)) {
+        setMoreOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
 
   return (
     <>
@@ -45,7 +63,7 @@ export function Header() {
                 </span>
               </Link>
               <nav className="hidden md:flex items-center gap-1">
-                {navItems.map((item) => (
+                {mainNavItems.map((item) => (
                   <Link
                     key={item.href}
                     href={item.href}
@@ -54,6 +72,31 @@ export function Header() {
                     {item.label}
                   </Link>
                 ))}
+                <div className="relative" ref={moreRef}>
+                  <button
+                    onClick={() => setMoreOpen(!moreOpen)}
+                    className="px-3 py-1.5 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex items-center gap-1"
+                  >
+                    More
+                    <svg width="10" height="6" viewBox="0 0 10 6" fill="currentColor" className={`transition-transform ${moreOpen ? "rotate-180" : ""}`}>
+                      <path d="M1 1l4 4 4-4" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </button>
+                  {moreOpen && (
+                    <div className="absolute top-full left-0 mt-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg py-1 min-w-[160px] z-50">
+                      {moreNavItems.map((item) => (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          onClick={() => setMoreOpen(false)}
+                          className="block px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                        >
+                          {item.label}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </nav>
             </div>
 
@@ -92,7 +135,7 @@ export function Header() {
           </div>
           {mobileMenuOpen && (
             <nav className="md:hidden pb-3 border-t border-gray-100 dark:border-gray-800 pt-2 space-y-1">
-              {navItems.map((item) => (
+              {allNavItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
