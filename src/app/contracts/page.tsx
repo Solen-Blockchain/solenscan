@@ -34,12 +34,16 @@ export default function ContractsPage() {
               api.callView(id, "total_supply").catch(() => null),
             ]);
 
-            const name = nameRes?.success
-              ? new TextDecoder().decode(hexToBytes(nameRes.return_data))
-              : "";
-            const symbol = symbolRes?.success
-              ? new TextDecoder().decode(hexToBytes(symbolRes.return_data))
-              : "";
+            // Contracts without `name`/`symbol` return the literal bytes
+            // "err:unknown_method" via their default dispatcher — still
+            // success=true at the callView layer. Strip those.
+            const decode = (r: typeof nameRes) => {
+              if (!r?.success) return "";
+              const s = new TextDecoder().decode(hexToBytes(r.return_data));
+              return s.startsWith("err:") ? "" : s;
+            };
+            const name = decode(nameRes);
+            const symbol = decode(symbolRes);
             const isSrc20 = !!(supplyRes?.success && supplyRes.return_data.length === 32);
             const totalSupply = isSrc20
               ? bytesToU128(hexToBytes(supplyRes!.return_data)).toString()
@@ -109,7 +113,7 @@ export default function ContractsPage() {
                     )}
                   </td>
                   <td className="px-6 py-4 text-sm text-right font-mono text-gray-900 dark:text-gray-100">
-                    {c.totalSupply ? Number(c.totalSupply).toLocaleString() : "—"}
+                    {formatSupply(c.totalSupply)}
                   </td>
                 </tr>
               ))}
@@ -136,4 +140,24 @@ function bytesToU128(bytes: Uint8Array): bigint {
     value = (value << BigInt(8)) | BigInt(bytes[i]);
   }
   return value;
+}
+
+/**
+ * Format a raw-units SRC-20 supply as a decimal string. Tokens on Solen use
+ * 8 decimals by convention, so divide by 10^8 and comma-group the whole part.
+ */
+function formatSupply(raw: string): string {
+  if (!raw) return "—";
+  try {
+    const value = BigInt(raw);
+    const scale = BigInt("100000000"); // 10^8
+    const whole = value / scale;
+    const frac = value % scale;
+    const wholeStr = whole.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    if (frac === BigInt(0)) return wholeStr;
+    const fracStr = frac.toString().padStart(8, "0").replace(/0+$/, "");
+    return `${wholeStr}.${fracStr}`;
+  } catch {
+    return raw;
+  }
 }
