@@ -30,16 +30,32 @@ function computeHealth(
   }
 
   const targetBlockTimeMs = chainStatus?.config?.block_time_ms ?? 1000;
-  const sinceLast = Date.now() - blocks[0].timestamp_ms;
   const messages: string[] = [];
   let worst: HealthLevel = "healthy";
 
-  if (sinceLast > targetBlockTimeMs * 5) {
+  // Stall detection: only fire when the most recent block we know about
+  // is much older than expected. The threshold is intentionally generous
+  // (30× target) so this never triggers on transient render races where
+  // `blocks` is briefly stale while its refetch is in flight.
+  const sinceLast = Date.now() - blocks[0].timestamp_ms;
+  if (sinceLast > targetBlockTimeMs * 30) {
     messages.push(`No new block in ${Math.floor(sinceLast / 1000)}s`);
     worst = "down";
-  } else if (sinceLast > targetBlockTimeMs * 2) {
-    messages.push(`Block production slow: last block ${Math.floor(sinceLast / 1000)}s ago`);
-    if (worst === "healthy") worst = "degraded";
+  }
+
+  // Sustained slow production: averaged across the recent window so a
+  // single jittery block doesn't flicker the banner.
+  if (blocks.length >= 5) {
+    const avgBlockTimeMs =
+      (blocks[0].timestamp_ms - blocks[blocks.length - 1].timestamp_ms) /
+      (blocks.length - 1);
+    if (avgBlockTimeMs > targetBlockTimeMs * 3) {
+      messages.push(
+        `Avg block time ${(avgBlockTimeMs / 1000).toFixed(1)}s ` +
+        `(target ${(targetBlockTimeMs / 1000).toFixed(1)}s)`
+      );
+      if (worst === "healthy") worst = "degraded";
+    }
   }
 
   if (validators && validators.total_count > 0) {
