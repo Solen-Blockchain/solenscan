@@ -32,6 +32,7 @@ export default function BlockDetailPage() {
           api.getBlock(height),
           api.getBlockRpc(height),
           api.getBlockTxs(height),
+          api.getLatestBlock(), // side effect: anchors the logical→wall-clock mapping
         ]);
 
         if (mounted.current) {

@@ -60,12 +60,35 @@ export function truncateHash(hash: string, chars = 8): string {
   return `${hash.slice(0, chars + 2)}...${hash.slice(-chars)}`;
 }
 
+// Solen block timestamps are a deterministic LOGICAL clock (parent_ts +
+// block_time_ms), NOT wall-clock Unix time — a recent block's timestamp_ms is a
+// small value, so `new Date(ms)` lands in 1970. We instead anchor the highest
+// logical timestamp we've seen ("the tip") to the real clock, then extrapolate:
+// logical deltas track real elapsed time (~one block_time per block), so block
+// ages are accurate relative to the tip. Anchor only from the chain tip /
+// recent-block lists (see setTimeAnchor calls in api.ts and the block subscription).
+let timeAnchor: { logicalMs: number; realMs: number } | null = null;
+
+export function setTimeAnchor(tipLogicalMs: number): void {
+  if (!Number.isFinite(tipLogicalMs)) return;
+  // Only ratchet forward — a stale or older block must never pull "now" back.
+  if (!timeAnchor || tipLogicalMs >= timeAnchor.logicalMs) {
+    timeAnchor = { logicalMs: tipLogicalMs, realMs: Date.now() };
+  }
+}
+
+/** Map a block's logical timestamp to an approximate wall-clock time (ms). */
+export function logicalToRealMs(blockLogicalMs: number): number {
+  if (!timeAnchor) return Date.now(); // no tip seen yet — avoid the 1970 artifact
+  return timeAnchor.realMs - (timeAnchor.logicalMs - blockLogicalMs);
+}
+
 export function formatTimestamp(ms: number): string {
-  return new Date(ms).toLocaleString();
+  return new Date(logicalToRealMs(ms)).toLocaleString();
 }
 
 export function timeAgo(ms: number): string {
-  const seconds = Math.floor((Date.now() - ms) / 1000);
+  const seconds = Math.floor((Date.now() - logicalToRealMs(ms)) / 1000);
   if (seconds < 0) return "just now";
   if (seconds < 60) return `${seconds}s ago`;
   const minutes = Math.floor(seconds / 60);

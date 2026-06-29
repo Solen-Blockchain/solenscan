@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useCallback, useState } from "react";
 import { useNetwork } from "@/context/NetworkContext";
+import { setTimeAnchor } from "@/lib/utils";
 
 export interface BlockNotification {
   height: number;
@@ -85,6 +86,7 @@ export function useBlockSubscription() {
           // Subscription notification.
           if (msg.method === "solen_newBlock" && msg.params?.result) {
             const block = msg.params.result as BlockNotification;
+            setTimeAnchor(block.timestamp_ms); // freshest tip → anchor the clock
             setLatestBlock(block);
             bump();
           }

@@ -14,6 +14,7 @@ import {
   IntentInfo,
   RpcResponse,
 } from "./types";
+import { setTimeAnchor } from "./utils";
 
 async function fetchExplorer<T>(
   networkId: string,
@@ -66,7 +67,13 @@ export function createApi(network: NetworkConfig) {
       rpcCall<RpcChainStatus>(id, "solen_chainStatus"),
 
     getBlocks: (limit = 20, offset = 0) =>
-      fetchExplorer<IndexedBlock[]>(id, `api/blocks?limit=${limit}&offset=${offset}`),
+      fetchExplorer<IndexedBlock[]>(id, `api/blocks?limit=${limit}&offset=${offset}`).then((bs) => {
+        // Anchor the logical-clock → wall-clock mapping from the newest block.
+        if (Array.isArray(bs) && bs.length) {
+          setTimeAnchor(Math.max(...bs.map((b) => b.timestamp_ms)));
+        }
+        return bs;
+      }),
 
     getBlock: (height: number) =>
       fetchExplorer<IndexedBlock>(id, `api/blocks/${height}`),
@@ -99,7 +106,10 @@ export function createApi(network: NetworkConfig) {
       rpcCall<string>(id, "solen_getBalance", { account_id: accountId }),
 
     getLatestBlock: () =>
-      rpcCall<BlockInfo>(id, "solen_getLatestBlock"),
+      rpcCall<BlockInfo>(id, "solen_getLatestBlock").then((b) => {
+        if (b && Number.isFinite(b.timestamp_ms)) setTimeAnchor(b.timestamp_ms);
+        return b;
+      }),
 
     getValidators: () =>
       fetchExplorer<ValidatorSetResponse>(id, "api/validators"),

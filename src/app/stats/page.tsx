@@ -11,7 +11,7 @@ import {
   IndexedBlock,
   ValidatorSetResponse,
 } from "@/lib/types";
-import { formatNumber } from "@/lib/utils";
+import { formatNumber, logicalToRealMs } from "@/lib/utils";
 
 type HealthLevel = "healthy" | "degraded" | "down" | "unknown";
 
@@ -37,7 +37,7 @@ function computeHealth(
   // is much older than expected. The threshold is intentionally generous
   // (30× target) so this never triggers on transient render races where
   // `blocks` is briefly stale while its refetch is in flight.
-  const sinceLast = Date.now() - blocks[0].timestamp_ms;
+  const sinceLast = Date.now() - logicalToRealMs(blocks[0].timestamp_ms);
   if (sinceLast > targetBlockTimeMs * 30) {
     messages.push(`No new block in ${Math.floor(sinceLast / 1000)}s`);
     worst = "down";
@@ -235,11 +235,11 @@ export default function StatsPage() {
           <DetailItem label="Network" value={network.name} />
           <DetailItem
             label="Genesis"
-            value={genesisTime ? new Date(genesisTime).toLocaleDateString() : "—"}
+            value={genesisTime ? new Date(logicalToRealMs(genesisTime)).toLocaleDateString() : "—"}
           />
           <DetailItem
             label="Uptime"
-            value={genesisTime ? formatUptime(Date.now() - genesisTime) : "—"}
+            value={genesisTime ? formatUptime(Date.now() - logicalToRealMs(genesisTime)) : "—"}
           />
           <DetailItem
             label="Total Txs"
