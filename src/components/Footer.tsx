@@ -6,7 +6,7 @@ export function Footer() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <Image src="/logo.png" alt="SolenScan" width={20} height={20} className="h-5 w-5" />
+            <Image src="/logo-v2.png" alt="SolenScan" width={20} height={20} className="h-5 w-5" />
             <span className="text-sm font-medium text-gray-700 dark:text-gray-300">SolenScan</span>
             <span className="text-xs text-gray-400 dark:text-gray-500">Solen Blockchain Explorer</span>
           </div>

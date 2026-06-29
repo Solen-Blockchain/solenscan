@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   keywords: ["Solen", "blockchain", "explorer", "block explorer", "transactions", "validators", "rollups"],
   authors: [{ name: "Solen Foundation" }],
   icons: {
-    icon: "/favicon.png",
+    icon: "/favicon-v2.png",
   },
   openGraph: {
     type: "website",
@@ -30,14 +30,14 @@ export const metadata: Metadata = {
     title: "SolenScan — Solen Blockchain Explorer",
     description: "Explore blocks, transactions, accounts, validators, contracts, and rollups on the Solen blockchain.",
     siteName: "SolenScan",
-    images: [{ url: "https://solenscan.io/logo.png", width: 512, height: 512, alt: "SolenScan" }],
+    images: [{ url: "https://solenscan.io/logo-v2.png", width: 512, height: 512, alt: "SolenScan" }],
   },
   twitter: {
     card: "summary",
     site: "@solenchain",
     title: "SolenScan — Solen Blockchain Explorer",
     description: "Explore blocks, transactions, accounts, validators, contracts, and rollups on the Solen blockchain.",
-    images: ["/logo.png"],
+    images: ["/logo-v2.png"],
   },
 };
 

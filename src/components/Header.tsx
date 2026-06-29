@@ -53,7 +53,7 @@ export function Header() {
             <div className="flex items-center gap-6">
               <Link href="/" className="flex items-center gap-2">
                 <Image
-                  src="/logo.png"
+                  src="/logo-v2.png"
                   alt="SolenScan"
                   width={28}
                   height={28}
